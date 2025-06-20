@@ -27,8 +27,8 @@ Build a small, high-quality mobile app that displays and lets users browse a gri
 ## Quality & Delivery
 
 - **Repository Setup**  
-  - Fork from our template repo (link)  
-  - Public GitHub repo until review completed  
+  - Fork from the `mobile-coding-challenge` repo
+  - Keep the fork public until the review is completed
 
 - **Commit Hygiene**  
   - Small, atomic commits with descriptive messages 
