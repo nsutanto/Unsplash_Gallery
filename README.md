@@ -1,24 +1,50 @@
 # Mobile Developer Coding Challenge
 
-This is a coding challenge for prospective mobile developer applicants applying through http://work.traderev.com/
+Build a small, high-quality mobile app that displays and lets users browse a grid of curated photos from Unsplash, then view each photo fullscreen with metadata.
 
-## Goal:
+- **Platform & Language**  
+  - **Android:** Kotlin + Jetpack Compose  
+  - **iOS:** Swift 5+ + SwiftUI  
 
-#### Build simple app that allows viewing and interacting with a grid of curated photos from Unsplash
+- **API Docs:**  
+  https://unsplash.com/documentation  
 
-- [ ] Fork this repo. Keep it public until we have been able to review it.
-- [ ] Android: _Java_ or _Kotlin_ | iOS: _Swift 4_
-- [ ] Unsplash API docs are here: https://unsplash.com/documentation.
-- [ ] Grid of photos should preserve the aspect ratio of the photos it's displaying, meaning you shouldn't crop the image in any way.
-- [ ] App should work in both portrait and landscape orientations of the device.
-- [ ] Grid should support pagination, i.e. you can scroll on grid of photos infinitely.
-- [ ] When user taps on a photo on the grid it should show only the tapped photo in full screen with more information about the photo.
-- [ ] When user swipes on a photo in full screen, it should show the the next photo and preserve current photo's location on the grid, so when she dismisses the full screen, grid of photos should contain the last photo she saw in photo details.
 
-### Evaluation:
-- [ ] Solution compiles. If there are necessary steps required to get it to compile, those should be covered in README.md.
-- [ ] No crashes, bugs, compiler warnings
-- [ ] App operates as intended
-- [ ] Conforms to SOLID principles
-- [ ] Code is easily understood and communicative
-- [ ] Commit history is consistent, easy to follow and understand
+## Functional Requirements
+
+1. **Grid View**  
+   - Paginated, infinite-scrolling grid of photos  
+   - Preserves each image’s aspect ratio (no cropping)  
+   - Supports both portrait & landscape orientations  
+
+2. **Detail View**  
+   - Tap any grid item to open fullscreen detail  
+   - Displays photo, author name, description/alt text, like count, etc.  
+   - Swipe left/right to navigate between photos  
+   - On dismiss, grid scroll position retains the last-viewed photo   
+
+
+## Quality & Delivery
+
+- **Repository Setup**  
+  - Fork from our template repo (link)  
+  - Public GitHub repo until review completed  
+
+- **Commit Hygiene**  
+  - Small, atomic commits with descriptive messages 
+
+## Bonus (Pick Any)
+
+- Unit tests
+- Dark mode support
+- Offline caching of the entire photo feed using a local DB
+- Share a photo link via the system share sheet  
+- Custom transition animation between grid ⇄ detail  
+
+## Evaluation Criteria
+
+- **Correctness:** Builds, runs, meets core requirements, no crashes  
+- **Code Quality:** SOLID principles, clean layering, readability  
+- **Architecture:** Separation of concerns, testability  
+- **UX Polish:** Smooth scrolling, placeholders, error handling  
+- **Git Hygiene:** Clear history
