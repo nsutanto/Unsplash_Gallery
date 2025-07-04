@@ -1,10 +1,19 @@
 package com.nsutanto.photoviews.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -12,7 +21,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.nsutanto.photoviews.viewmodel.PhotoDetailViewModel
@@ -51,7 +62,7 @@ fun PhotoDetail(viewModel: PhotoDetailViewModel = koinViewModel(),
         snapshotFlow { pagerState.currentPage }
             .distinctUntilChanged()
             .collect { pageIndex ->
-                viewModel.setCurrentPhoto(pageIndex)
+                viewModel.setCurrentPhotoIdByIndex(pageIndex)
             }
     }
 
@@ -59,12 +70,48 @@ fun PhotoDetail(viewModel: PhotoDetailViewModel = koinViewModel(),
         state = pagerState,
         modifier = Modifier.fillMaxSize()
     ) { page ->
-        AsyncImage(
-            model = photos[page].url,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
+        val photo = photos[page]
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            AsyncImage(
+                model = photo.url,
+                contentDescription = null,
+                contentScale = ContentScale.Fit, // or ContentScale.Inside
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.DarkGray)
+                    .padding(16.dp)
+            ) {
+                if (!photo.userName.isNullOrBlank()) {
+                    Text(
+                        text = "Photo by ${photo.userName}", // TODO: Move this
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.White // TODO Use theme color
+                    )
+                }
+
+                if (!photo.description.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = photo.description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White
+                    )
+                }
+            }
+        }
     }
 }
 

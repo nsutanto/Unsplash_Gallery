@@ -69,6 +69,7 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
 
     fun onPhotoClicked(index: Int) {
         viewModelScope.launch {
+            // TODO: Use Shared Photo State
             photoList[index].id?.let { id ->
                 _selectedPhotoId.emit(id)
             }
