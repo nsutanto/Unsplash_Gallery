@@ -1,7 +1,8 @@
 package com.nsutanto.photoviews.model
 
+import com.google.gson.annotations.SerializedName
+
 data class Photo(
-    val id: Int,
-    val listId: Int,
-    val name: String?
+    @SerializedName("id") val id: String?,
+    @SerializedName("urls") val urls: PhotoUrls?,
 )

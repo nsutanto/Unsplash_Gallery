@@ -2,22 +2,19 @@ package com.nsutanto.photoviews.repository
 
 import com.nsutanto.photoviews.api.ApiService
 import com.nsutanto.photoviews.model.Photo
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class PhotoRepository : IPhotosRepository {
-    override suspend fun fetchPhotos(): List<Photo> {
 
+    // Backing state to emit the photo list
+    private val _photoFlow = MutableStateFlow<List<Photo>>(emptyList())
 
-        // TODO
-        return mutableListOf<Photo>()
-        /*
-        val result = ApiService.fetchPhotos()
-        val filtered = result.filter { !it.name.isNullOrBlank() }
-            .sortedWith(compareBy({ it.listId }, { it.name }))
+    // Public immutable flow
+    val photoFlow: StateFlow<List<Photo>> = _photoFlow
 
-        return filtered.groupBy { it.listId }
-            .map { GroupedItem(it.key, it.value) }
-            .sortedBy { it.listId }
+    override suspend fun fetchPhotos() {
+        _photoFlow.value = ApiService.fetchPhotos()
 
-         */
     }
 }
