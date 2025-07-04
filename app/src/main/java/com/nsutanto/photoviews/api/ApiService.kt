@@ -11,7 +11,7 @@ import com.nsutanto.photoviews.BuildConfig
 import io.ktor.http.isSuccess
 
 object ApiService {
-    private const val PER_PAGE = 10
+    const val PER_PAGE = 10
     private const val BASE_URL = "https://api.unsplash.com"
 
     private val client = HttpClient {

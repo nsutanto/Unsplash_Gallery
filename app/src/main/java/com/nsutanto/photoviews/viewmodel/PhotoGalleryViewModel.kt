@@ -2,6 +2,7 @@ package com.nsutanto.photoviews.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nsutanto.photoviews.api.ApiService
 import com.nsutanto.photoviews.model.Photo
 import com.nsutanto.photoviews.repository.IPhotoRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -36,6 +37,13 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
                 println("***** Photo Size is ${photos.size}")
                 photoList = photos.toMutableList()
                 _photoListUrl.value = photos.mapNotNull { it.urls?.regular }
+
+                // Handle initialization. If we have photos already, we want to set the current page correctly based on number of photos per page
+                currentPage = if (photos.isEmpty()) {
+                    1
+                } else {
+                    photos.size / ApiService.PER_PAGE
+                }
             }
         }
 
@@ -57,9 +65,8 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
         if (_apiStatus.value == APIStatus.LOADING) {
             return
         }
-        _apiStatus.value = APIStatus.LOADING
-
         viewModelScope.launch {
+            _apiStatus.value = APIStatus.LOADING
             try {
                 repository.fetchPhotos(currentPage)
                 currentPage++

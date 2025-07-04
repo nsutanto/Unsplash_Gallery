@@ -3,20 +3,18 @@ package com.nsutanto.photoviews.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -25,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nsutanto.photoviews.viewmodel.PhotoGalleryViewModel
 import coil.compose.AsyncImage
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import org.koin.androidx.compose.koinViewModel
@@ -35,8 +34,7 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
     val photoUrls by viewModel.photoListUrl.collectAsStateWithLifecycle()
     val currentPhotoIndex by viewModel.lastViewedIndex.collectAsStateWithLifecycle()
     val apiStatus by viewModel.apiStatus.collectAsStateWithLifecycle()
-
-    val listState = rememberLazyListState()
+    val gridState = rememberLazyGridState()
 
     // Observe if photo is clicked so that we can navigate to the detail screen
     LaunchedEffect(Unit) {
@@ -48,55 +46,48 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
         }
     }
 
-    // Get the last viewed photo index and scroll to it
     LaunchedEffect(currentPhotoIndex) {
-        currentPhotoIndex?.let {
-            listState.animateScrollToItem(it)
+        currentPhotoIndex?.let { index ->
+            gridState.scrollToItem(index = index, scrollOffset = 0)
         }
     }
 
-    // Implement the infinite scroll feature
-    // TODO: Fix this logic to avoid fetching too many times
-    LaunchedEffect(listState) {
-        snapshotFlow { listState.layoutInfo }
+    // Trigger fetchPhotos when reaching near the end
+    LaunchedEffect(gridState) {
+        snapshotFlow { gridState.layoutInfo }
             .map { layoutInfo ->
-                val lastVisible = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                // counting last visible, needs to use first() since last() will return big number during initialization.
+                // Otherwise it will try to re-compose and re-fetch multiple times
+                val lastVisible = layoutInfo.visibleItemsInfo.firstOrNull()?.index ?: 0
                 val totalItems = layoutInfo.totalItemsCount
                 lastVisible to totalItems
             }
             .distinctUntilChanged()
-            .collect { (lastVisible, totalItems) ->
-                if (lastVisible >= totalItems - 3) {
-                    println("***** Photo Gallery: Fetching more photos...")
+            .collectLatest { (lastVisible, totalItems) ->
+                val isNearBottom = lastVisible >= totalItems - 3 // start fetching when 3 items are left
+
+                if (isNearBottom) {
                     viewModel.fetchPhotos()
                 }
             }
     }
-    Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(photoUrls.size) { index ->
-                PhotoItem(
-                    url = photoUrls[index],
-                    onClick = {
-                        viewModel.onPhotoClicked(index)
-                    }
-                )
-            }
-        }
-        if (apiStatus == PhotoGalleryViewModel.APIStatus.LOADING) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.3f)),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = Color.White)
-            }
+
+
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(1),
+        state = gridState,
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(photoUrls.size) { index ->
+            PhotoItem(
+                url = photoUrls[index],
+                onClick = {
+                    viewModel.onPhotoClicked(index)
+                }
+            )
         }
     }
 }
