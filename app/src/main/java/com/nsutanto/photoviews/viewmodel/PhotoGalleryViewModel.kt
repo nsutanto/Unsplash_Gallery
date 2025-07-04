@@ -10,8 +10,14 @@ import kotlinx.coroutines.launch
 class PhotoGalleryViewModel : ViewModel() {
     private val repository = PhotoRepository()
 
+    enum class APIStatus { INIT, ERROR, LOADING }
+    private var currentPage = 1
+
     private val _photoListUrl = MutableStateFlow<List<String>>(emptyList())
     val photoListUrl: StateFlow<List<String>> = _photoListUrl
+
+    private val _apiStatus = MutableStateFlow(APIStatus.INIT)
+    val apiStatus: StateFlow<APIStatus> = _apiStatus
 
     init {
         viewModelScope.launch {
@@ -22,9 +28,20 @@ class PhotoGalleryViewModel : ViewModel() {
         fetchPhotos()
     }
 
-    private fun fetchPhotos() {
+    fun fetchPhotos() {
+        if (_apiStatus.value == APIStatus.LOADING) {
+            return
+        }
+        _apiStatus.value = APIStatus.LOADING
+
         viewModelScope.launch {
-            repository.fetchPhotos()
+            try {
+                repository.fetchPhotos(currentPage)
+                currentPage++
+                _apiStatus.value = APIStatus.INIT
+            } catch (e: Exception) {
+                _apiStatus.value = APIStatus.ERROR
+            }
         }
     }
 }
