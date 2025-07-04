@@ -28,7 +28,6 @@ class PhotoGalleryViewModel : ViewModel() {
         fetchPhotos()
     }
 
-
     fun fetchPhotos() {
         if (_apiStatus.value == APIStatus.LOADING) {
             return

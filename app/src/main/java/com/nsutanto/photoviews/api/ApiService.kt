@@ -9,7 +9,7 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.gson.*
 
 object ApiService {
-    private const val PER_PAGE = 30
+    private const val PER_PAGE = 20
     private const val BASE_URL = "https://api.unsplash.com"
 
     private val client = HttpClient {

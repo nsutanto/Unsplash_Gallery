@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -48,7 +49,7 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = viewModel()) {
     LazyColumn(
         state = listState,
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(vertical = 8.dp),
+        contentPadding = PaddingValues(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(photoUrls.size) { index ->
@@ -62,11 +63,11 @@ fun PhotoItem(url: String) {
     AsyncImage(
         model = url,
         contentDescription = null,
-        contentScale = ContentScale.Crop,
+        contentScale = ContentScale.Fit,
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(1.5f)
-            .clip(RoundedCornerShape(8.dp)) // Move this to theme
+            .wrapContentHeight()
+            .clip(RoundedCornerShape(8.dp))
             .background(Color.LightGray)
     )
 }
