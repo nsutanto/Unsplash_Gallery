@@ -56,6 +56,7 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
     }
 
     // Implement the infinite scroll feature
+    // TODO: Fix this logic to avoid fetching too many times
     LaunchedEffect(listState) {
         snapshotFlow { listState.layoutInfo }
             .map { layoutInfo ->
@@ -66,6 +67,7 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
             .distinctUntilChanged()
             .collect { (lastVisible, totalItems) ->
                 if (lastVisible >= totalItems - 3) {
+                    println("***** Photo Gallery: Fetching more photos...")
                     viewModel.fetchPhotos()
                 }
             }

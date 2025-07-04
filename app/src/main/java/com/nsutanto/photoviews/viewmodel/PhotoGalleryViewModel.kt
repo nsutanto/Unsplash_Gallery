@@ -33,6 +33,7 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
         // Collect photos from repository
         viewModelScope.launch {
             repository.photoFlow.collect { photos ->
+                println("***** Photo Size is ${photos.size}")
                 photoList = photos.toMutableList()
                 _photoListUrl.value = photos.mapNotNull { it.urls?.regular }
             }
@@ -64,6 +65,8 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
                 currentPage++
                 _apiStatus.value = APIStatus.INIT
             } catch (e: Exception) {
+                println("***** Fetch Photos Exception: ${e.message}")
+                // TODO: Implement proper error handling on the UI
                 _apiStatus.value = APIStatus.ERROR
             }
         }

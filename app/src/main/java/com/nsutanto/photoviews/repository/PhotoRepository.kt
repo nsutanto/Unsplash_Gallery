@@ -26,7 +26,9 @@ class PhotoRepository(
         try {
             CoroutineScope(Dispatchers.IO).launch {
                 val cachedPhotos = dao.getAll().map { it.toPhoto() }
-                _photoFlow.value = cachedPhotos
+                if (cachedPhotos.isNotEmpty()) {
+                    _photoFlow.value = cachedPhotos
+                }
             }
         } catch (e: Exception) {
             // Handle any exceptions that occur while fetching cached photos
@@ -36,14 +38,21 @@ class PhotoRepository(
 
     override suspend fun fetchPhotos(page: Int) {
         try {
+            println("***** Fetch Photos Page: $page")
             val newPhotos = api.fetchPhotos(page)
+            val uniqueNewPhotos = newPhotos.filterNot { newPhoto ->
+                _photoFlow.value.any { it.id == newPhoto.id }
+            }
+
             withContext(Dispatchers.IO) {
-                val entities = newPhotos.map { it.toEntity() }
+                val entities = uniqueNewPhotos.map { it.toEntity() }
                 dao.insertAll(entities)
             }
 
-            _photoFlow.value += newPhotos
+            // Append only unique new photos to the current list
+            _photoFlow.value += uniqueNewPhotos
         } catch (e: Exception) {
+            println("***** Get Exception: ${e.message}")
             // TODO: Handle all exception for now, maybe need a separate API exception or other error
             val cachedPhotos = withContext(Dispatchers.IO) {
                 dao.getAll().map { it.toPhoto() }
