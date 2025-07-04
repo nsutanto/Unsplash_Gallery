@@ -23,9 +23,9 @@ import org.koin.androidx.compose.koinViewModel
 fun PhotoDetail(viewModel: PhotoDetailViewModel = koinViewModel(),
                 photoId: String) {
 
-    val photoUrls by viewModel.photoListUrl.collectAsStateWithLifecycle()
+    val photos by viewModel.photos.collectAsStateWithLifecycle()
 
-    if (photoUrls.isEmpty()) {
+    if (photos.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
@@ -33,14 +33,16 @@ fun PhotoDetail(viewModel: PhotoDetailViewModel = koinViewModel(),
     }
 
     // Find the initial page based on photoId
-    val initialPage = remember(photoId to photoUrls) {
+    val initialPage = remember(photoId to photos) {
         viewModel.getPhotoIndexById(photoId)
     }
 
+    // Pager state
+    // https://developer.android.com/develop/ui/compose/layouts/pager
     val pagerState = rememberPagerState(
         initialPage = initialPage,
         pageCount = {
-            photoUrls.size
+            photos.size
         }
     )
 
@@ -58,7 +60,7 @@ fun PhotoDetail(viewModel: PhotoDetailViewModel = koinViewModel(),
         modifier = Modifier.fillMaxSize()
     ) { page ->
         AsyncImage(
-            model = photoUrls[page],
+            model = photos[page].url,
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()

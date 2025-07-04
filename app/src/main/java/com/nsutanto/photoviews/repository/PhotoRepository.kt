@@ -7,10 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 class PhotoRepository : IPhotoRepository {
 
-    // Backing state to emit the photo list
     private val _photoFlow = MutableStateFlow<List<Photo>>(emptyList())
-
-    // Public immutable flow
     override val photoFlow: StateFlow<List<Photo>> = _photoFlow
 
     override suspend fun fetchPhotos(page: Int) {
