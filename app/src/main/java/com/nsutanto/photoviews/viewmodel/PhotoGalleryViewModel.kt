@@ -21,6 +21,9 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
     private val _selectedPhotoId = MutableSharedFlow<String?>()
     val selectedPhotoId = _selectedPhotoId.asSharedFlow()
 
+    private val _lastViewedIndex = MutableStateFlow<Int?>(null)
+    val lastViewedIndex: StateFlow<Int?> = _lastViewedIndex
+
     private val _apiStatus = MutableStateFlow(APIStatus.INIT)
     val apiStatus: StateFlow<APIStatus> = _apiStatus
 
@@ -33,6 +36,17 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
                 _photoListUrl.value = photos.mapNotNull { it.urls?.regular }
             }
         }
+
+        viewModelScope.launch {
+            SharedPhotoState.currentPhotoId.collect { photoId ->
+                photoId?.let { id ->
+                    val photoIndex = photoList.indexOfFirst { it.id == id }
+                    _lastViewedIndex.value = photoIndex
+                }
+            }
+        }
+
+
         fetchPhotos()
     }
 

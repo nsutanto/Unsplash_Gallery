@@ -5,16 +5,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.CircularProgressIndicator
-
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.nsutanto.photoviews.viewmodel.PhotoDetailViewModel
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -42,13 +44,14 @@ fun PhotoDetail(viewModel: PhotoDetailViewModel = koinViewModel(),
         }
     )
 
-    // Handle back press and return current photo id
-    //BackHandler {
-    //    val currentPhotoId = photoList.getOrNull(pagerState.currentPage)?.id
-    //    if (currentPhotoId != null) {
-    //        //onBackWithPhotoId(currentPhotoId)
-    //    }
-    //}
+    // Observe page changes to update the current photo in the view model
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }
+            .distinctUntilChanged()
+            .collect { pageIndex ->
+                viewModel.setCurrentPhoto(pageIndex)
+            }
+    }
 
     HorizontalPager(
         state = pagerState,
