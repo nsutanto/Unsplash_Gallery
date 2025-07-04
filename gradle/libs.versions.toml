@@ -13,6 +13,7 @@ viewModelCompose = "2.9.1"
 coilVersion = "2.7.0"
 navigationComposeVersion = "2.9.1"
 koinVersion = "4.1.0"
+composeFoundationVersion = "1.8.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -38,7 +39,7 @@ coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coi
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationComposeVersion" }
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koinVersion" }
 koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koinVersion" }
-
+compose-foundation = { group = "androidx.compose.foundation", name="foundation", version.ref = "composeFoundationVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

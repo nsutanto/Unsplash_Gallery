@@ -19,6 +19,7 @@ class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel
     val photoDetailState: StateFlow<PhotoDetail> = _photoDetailState
 
     private var photoList = mutableListOf<Photo>()
+    private var currentIndex = 0
 
     init {
         viewModelScope.launch {
@@ -29,7 +30,32 @@ class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel
     }
 
     fun getPhotoDetail(photoId: String) {
-        val url = photoList.find { it.id == photoId }?.urls?.regular
-        _photoDetailState.value = PhotoDetail(url = url)
+        currentIndex = photoList.indexOfFirst { it.id == photoId }.coerceAtLeast(0)
+        updatePhotoDetail()
+    }
+
+    fun getPhotoUrls(): List<String> {
+        return photoList.mapNotNull { it.urls?.regular }
+    }
+
+    fun swipeLeft() {
+        if (currentIndex > 0) {
+            currentIndex--
+            updatePhotoDetail()
+        }
+    }
+
+    fun swipeRight() {
+        if (currentIndex < photoList.lastIndex) {
+            currentIndex++
+            updatePhotoDetail()
+        }
+    }
+
+    private fun updatePhotoDetail() {
+        val photo = photoList.getOrNull(currentIndex)
+        _photoDetailState.value = PhotoDetail(
+            url = photo?.urls?.regular,
+        )
     }
 }

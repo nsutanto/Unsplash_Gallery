@@ -21,7 +21,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nsutanto.photoviews.viewmodel.PhotoGalleryViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -35,7 +34,7 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
 
     LaunchedEffect(Unit) {
         viewModel.selectedPhotoId.collect { photoId ->
-            if (photoId != null) {
+            photoId?.let {
                 onPhotoClick(photoId)
                 viewModel.onNavigationHandled()
             }
