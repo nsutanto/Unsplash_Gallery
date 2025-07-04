@@ -5,12 +5,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -20,20 +22,37 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nsutanto.photoviews.viewmodel.PhotoGalleryViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 @Composable
 fun PhotoGallery(viewModel: PhotoGalleryViewModel = viewModel()) {
     val photoUrls by viewModel.photoListUrl.collectAsStateWithLifecycle()
+    val listState = rememberLazyListState()
 
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.layoutInfo }
+            .map { layoutInfo ->
+                val lastVisible = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                val totalItems = layoutInfo.totalItemsCount
+                lastVisible to totalItems
+            }
+            .distinctUntilChanged()
+            .collect { (lastVisible, totalItems) ->
+                if (lastVisible >= totalItems - 3) {
+                    viewModel.fetchPhotos()
+                }
+            }
+    }
+
+    LazyColumn(
+        state = listState,
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(8.dp), // TODO: Move this to thehme
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        contentPadding = PaddingValues(vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(items = photoUrls) { url ->
-            PhotoItem(url)
+        items(photoUrls.size) { index ->
+            PhotoItem(photoUrls[index])
         }
     }
 }
@@ -45,8 +64,9 @@ fun PhotoItem(url: String) {
         contentDescription = null,
         contentScale = ContentScale.Crop,
         modifier = Modifier
-            .aspectRatio(1f) // makes it square
-            .clip(RoundedCornerShape(8.dp)) // TODO: Move this to theme
-            .background(Color.LightGray) // TODO: Move this to theme
+            .fillMaxWidth()
+            .aspectRatio(1.5f)
+            .clip(RoundedCornerShape(8.dp)) // Move this to theme
+            .background(Color.LightGray)
     )
 }

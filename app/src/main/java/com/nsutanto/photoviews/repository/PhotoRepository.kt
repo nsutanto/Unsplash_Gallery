@@ -13,8 +13,10 @@ class PhotoRepository : IPhotosRepository {
     // Public immutable flow
     val photoFlow: StateFlow<List<Photo>> = _photoFlow
 
-    override suspend fun fetchPhotos() {
-        _photoFlow.value = ApiService.fetchPhotos()
+    override suspend fun fetchPhotos(page: Int) {
+        // TODO: Handle Network Errors
+        val newPhotos = ApiService.fetchPhotos(page = page)
+        _photoFlow.value += newPhotos
 
     }
 }
