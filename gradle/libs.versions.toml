@@ -1,18 +1,19 @@
 [versions]
 agp = "8.11.0"
-kotlin = "2.0.21"
+kotlin = "2.2.0"
 coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.9.1"
 activityCompose = "1.10.1"
-composeBom = "2024.09.00"
-ktor = "2.3.5"
-viewModelCompose = "2.8.0"
-coil = "2.4.0"
-navigationComposeVersion = "2.7.7"
-koinVersion = "3.5.3"
+composeBom = "2025.06.01"
+ktor = "3.2.1"
+viewModelCompose = "2.9.1"
+coilVersion = "2.7.0"
+navigationComposeVersion = "2.9.1"
+koinVersion = "4.1.0"
+composeFoundationVersion = "1.8.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -34,11 +35,11 @@ ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.r
 ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-gson = { group = "io.ktor", name = "ktor-serialization-gson", version.ref = "ktor" }
 lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "viewModelCompose" }
-coil-compose = { group = "io.coil-kt", name = "coil-compose", version = "2.4.0" }
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coilVersion" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationComposeVersion" }
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koinVersion" }
 koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koinVersion" }
-
+compose-foundation = { group = "androidx.compose.foundation", name="foundation", version.ref = "composeFoundationVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

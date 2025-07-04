@@ -15,8 +15,11 @@ class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel
         val userName: String? = null,
     )
 
-    private val _photoDetailState = MutableStateFlow(PhotoDetail())
-    val photoDetailState: StateFlow<PhotoDetail> = _photoDetailState
+    //private val _photos = MutableStateFlow<List<Photo>>(emptyList())
+    //val photos: StateFlow<List<Photo>> = _photos
+
+    private val _photoListUrl = MutableStateFlow<List<String>>(emptyList())
+    val photoListUrl: StateFlow<List<String>> = _photoListUrl
 
     private var photoList = mutableListOf<Photo>()
 
@@ -24,12 +27,12 @@ class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel
         viewModelScope.launch {
             repository.photoFlow.collect { photos ->
                 photoList = photos.toMutableList()
+                _photoListUrl.value = photos.mapNotNull { it.urls?.regular }
             }
         }
     }
 
-    fun getPhotoDetail(photoId: String) {
-        val url = photoList.find { it.id == photoId }?.urls?.regular
-        _photoDetailState.value = PhotoDetail(url = url)
+    fun getPhotoIndexById(photoId: String): Int {
+        return photoList.indexOfFirst { it.id == photoId }.coerceAtLeast(0)
     }
 }
