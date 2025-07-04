@@ -7,6 +7,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.gson.*
+import com.nsutanto.photoviews.BuildConfig
 
 object ApiService {
     private const val PER_PAGE = 20
@@ -22,9 +23,8 @@ object ApiService {
         val response: HttpResponse = client.get("$BASE_URL/photos") {
             parameter("page", page)
             parameter("per_page", perPage)
-            // TODO: Move access key to a secure location
             headers {
-                append("Authorization", "Client-ID 7rfF4QcN2PgI1UICVS8TVg-QA_W0xxKvfSUgLQZoqt8")
+                append("Authorization", "Client-ID ${BuildConfig.UNSPLASH_ACCESS_KEY}")
             }
         }
         return response.body()
