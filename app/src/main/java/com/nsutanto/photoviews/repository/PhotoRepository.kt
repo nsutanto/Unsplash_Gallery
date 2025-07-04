@@ -11,7 +11,7 @@ class PhotoRepository : IPhotoRepository {
     private val _photoFlow = MutableStateFlow<List<Photo>>(emptyList())
 
     // Public immutable flow
-    val photoFlow: StateFlow<List<Photo>> = _photoFlow
+    override val photoFlow: StateFlow<List<Photo>> = _photoFlow
 
     override suspend fun fetchPhotos(page: Int) {
         // TODO: Handle Network Errors

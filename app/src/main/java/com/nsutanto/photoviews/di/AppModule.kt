@@ -8,7 +8,7 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val appModule = module {
-    single<PhotoRepository> { PhotoRepository() } // Shared repository
+    single<IPhotoRepository> { PhotoRepository() } // Shared repository
     viewModel { PhotoGalleryViewModel(get()) }
     viewModel { PhotoDetailViewModel(get()) }
 }

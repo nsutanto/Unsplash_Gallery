@@ -3,6 +3,7 @@ package com.nsutanto.photoviews.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nsutanto.photoviews.model.Photo
+import com.nsutanto.photoviews.repository.IPhotoRepository
 import com.nsutanto.photoviews.repository.PhotoRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,7 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
-class PhotoGalleryViewModel(private val repository: PhotoRepository) : ViewModel() {
+class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewModel() {
 
     enum class APIStatus { INIT, ERROR, LOADING }
     private var currentPage = 1
