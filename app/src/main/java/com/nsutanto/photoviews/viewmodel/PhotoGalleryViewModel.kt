@@ -30,6 +30,7 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
     private var photoList = mutableListOf<Photo>()
 
     init {
+        // Collect photos from repository
         viewModelScope.launch {
             repository.photoFlow.collect { photos ->
                 photoList = photos.toMutableList()
@@ -37,6 +38,7 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
             }
         }
 
+        // Collect last viewed photo index
         viewModelScope.launch {
             SharedPhotoState.currentPhotoId.collect { photoId ->
                 photoId?.let { id ->
@@ -46,7 +48,7 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
             }
         }
 
-
+        // Fetch photos
         fetchPhotos()
     }
 
@@ -68,15 +70,16 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
     }
 
     fun onPhotoClicked(index: Int) {
+        // Get photo id by index
         viewModelScope.launch {
-            photoList[index].id?.let { id ->
-                _selectedPhotoId.emit(id)
-                SharedPhotoState.updateCurrentPhotoId(id)
-            }
+            val id = photoList[index].id
+            _selectedPhotoId.emit(id)
+            SharedPhotoState.updateCurrentPhotoId(id)
         }
     }
 
     fun onNavigationHandled() {
+        // Reset so that the next click will trigger the navigation again
         viewModelScope.launch {
             _selectedPhotoId.emit(null)
         }

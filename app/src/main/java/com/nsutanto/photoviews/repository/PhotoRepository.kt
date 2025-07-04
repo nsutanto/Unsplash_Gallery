@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class PhotoRepository(
@@ -22,23 +23,31 @@ class PhotoRepository(
 
     init {
         // Load cached photos first
-        CoroutineScope(Dispatchers.IO).launch {
-            val cachedPhotos = dao.getAll().map { it.toPhoto() }
-            _photoFlow.value = cachedPhotos
+        try {
+            CoroutineScope(Dispatchers.IO).launch {
+                val cachedPhotos = dao.getAll().map { it.toPhoto() }
+                _photoFlow.value = cachedPhotos
+            }
+        } catch (e: Exception) {
+            // Handle any exceptions that occur while fetching cached photos
+            _photoFlow.value = emptyList()
         }
     }
 
     override suspend fun fetchPhotos(page: Int) {
         try {
             val newPhotos = api.fetchPhotos(page)
-            CoroutineScope(Dispatchers.IO).launch {
+            withContext(Dispatchers.IO) {
                 val entities = newPhotos.map { it.toEntity() }
                 dao.insertAll(entities)
-
             }
+
             _photoFlow.value += newPhotos
         } catch (e: Exception) {
-            val cachedPhotos = dao.getAll().map { it.toPhoto() }
+            // TODO: Handle all exception for now, maybe need a separate API exception or other error
+            val cachedPhotos = withContext(Dispatchers.IO) {
+                dao.getAll().map { it.toPhoto() }
+            }
             _photoFlow.value = cachedPhotos
         }
     }

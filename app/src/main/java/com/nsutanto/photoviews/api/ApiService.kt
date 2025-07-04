@@ -8,6 +8,7 @@ import io.ktor.client.statement.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.gson.*
 import com.nsutanto.photoviews.BuildConfig
+import io.ktor.http.isSuccess
 
 object ApiService {
     private const val PER_PAGE = 10
@@ -27,6 +28,11 @@ object ApiService {
                 append("Authorization", "Client-ID ${BuildConfig.UNSPLASH_ACCESS_KEY}")
             }
         }
+        if (!response.status.isSuccess()) {
+            // TODO: Probably need to implement API Exception for specific API errors
+            throw Exception("HTTP ${response.status.value}: ${response.status.description}")
+        }
+        // TODO: Need to return APIResponse object that contains the data, API responses / error, etc
         return response.body()
     }
 }
