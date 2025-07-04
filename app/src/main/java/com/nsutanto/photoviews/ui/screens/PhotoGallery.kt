@@ -33,7 +33,6 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
                  onPhotoClick: (String) -> Unit) {
     val photoUrls by viewModel.photoListUrl.collectAsStateWithLifecycle()
     val currentPhotoIndex by viewModel.lastViewedIndex.collectAsStateWithLifecycle()
-    val apiStatus by viewModel.apiStatus.collectAsStateWithLifecycle()
     val gridState = rememberLazyGridState()
 
     // Observe if photo is clicked so that we can navigate to the detail screen
@@ -48,6 +47,7 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
 
     LaunchedEffect(currentPhotoIndex) {
         currentPhotoIndex?.let { index ->
+            println("***** Scrolling to index: $index")
             gridState.scrollToItem(index = index, scrollOffset = 0)
         }
     }

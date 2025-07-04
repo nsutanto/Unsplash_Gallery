@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 
 class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewModel() {
 
-    enum class APIStatus { INIT, ERROR, LOADING }
     private var currentPage = 1
 
     private val _photoListUrl = MutableStateFlow<List<String>>(emptyList())
@@ -24,9 +23,6 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
 
     private val _lastViewedIndex = MutableStateFlow<Int?>(null)
     val lastViewedIndex: StateFlow<Int?> = _lastViewedIndex
-
-    private val _apiStatus = MutableStateFlow(APIStatus.INIT)
-    val apiStatus: StateFlow<APIStatus> = _apiStatus
 
     private var photoList = mutableListOf<Photo>()
 
@@ -62,19 +58,14 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
     }
 
     fun fetchPhotos() {
-        if (_apiStatus.value == APIStatus.LOADING) {
-            return
-        }
+
         viewModelScope.launch {
-            _apiStatus.value = APIStatus.LOADING
             try {
                 repository.fetchPhotos(currentPage)
                 currentPage++
-                _apiStatus.value = APIStatus.INIT
             } catch (e: Exception) {
                 println("***** Fetch Photos Exception: ${e.message}")
                 // TODO: Implement proper error handling on the UI
-                _apiStatus.value = APIStatus.ERROR
             }
         }
     }

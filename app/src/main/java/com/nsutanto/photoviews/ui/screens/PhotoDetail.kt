@@ -75,17 +75,18 @@ fun PhotoDetail(viewModel: PhotoDetailViewModel = koinViewModel(),
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black),
+                .background(Color.Black)
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Top
         ) {
             AsyncImage(
                 model = photo.url,
                 contentDescription = null,
-                contentScale = ContentScale.Fit, // or ContentScale.Inside
+                contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .weight(1f)
             )
 
             Column(
