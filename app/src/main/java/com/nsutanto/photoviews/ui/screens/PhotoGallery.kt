@@ -1,9 +1,9 @@
 package com.nsutanto.photoviews.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -25,11 +25,22 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun PhotoGallery(viewModel: PhotoGalleryViewModel = viewModel()) {
+fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
+                 onPhotoClick: (String) -> Unit) {
     val photoUrls by viewModel.photoListUrl.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
+
+    LaunchedEffect(Unit) {
+        viewModel.selectedPhotoId.collect { photoId ->
+            if (photoId != null) {
+                onPhotoClick(photoId)
+                viewModel.onNavigationHandled()
+            }
+        }
+    }
 
     LaunchedEffect(listState) {
         snapshotFlow { listState.layoutInfo }
@@ -53,13 +64,18 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = viewModel()) {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(photoUrls.size) { index ->
-            PhotoItem(photoUrls[index])
+            PhotoItem(
+                url = photoUrls[index],
+                onClick = {
+                    viewModel.onPhotoClicked(index)
+                }
+            )
         }
     }
 }
 
 @Composable
-fun PhotoItem(url: String) {
+fun PhotoItem(url: String, onClick: () -> Unit) {
     AsyncImage(
         model = url,
         contentDescription = null,
@@ -69,5 +85,6 @@ fun PhotoItem(url: String) {
             .wrapContentHeight()
             .clip(RoundedCornerShape(8.dp))
             .background(Color.LightGray)
+            .clickable { onClick() }
     )
 }
