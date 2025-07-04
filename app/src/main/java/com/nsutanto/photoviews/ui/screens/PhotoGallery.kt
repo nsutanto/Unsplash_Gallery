@@ -30,6 +30,8 @@ import org.koin.androidx.compose.koinViewModel
 fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
                  onPhotoClick: (String) -> Unit) {
     val photoUrls by viewModel.photoListUrl.collectAsStateWithLifecycle()
+    val currentPhotoIndex by viewModel.lastViewedIndex.collectAsStateWithLifecycle()
+
     val listState = rememberLazyListState()
 
     LaunchedEffect(Unit) {
@@ -38,6 +40,12 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
                 onPhotoClick(photoId)
                 viewModel.onNavigationHandled()
             }
+        }
+    }
+
+    LaunchedEffect(currentPhotoIndex) {
+        currentPhotoIndex?.let {
+            listState.animateScrollToItem(it)
         }
     }
 

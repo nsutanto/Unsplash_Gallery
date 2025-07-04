@@ -14,10 +14,7 @@ class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel
         val url: String? = null,
         val userName: String? = null,
     )
-
-    //private val _photos = MutableStateFlow<List<Photo>>(emptyList())
-    //val photos: StateFlow<List<Photo>> = _photos
-
+    // TODO: Refactor this, might just use the Photo Detail object instead of photo list url
     private val _photoListUrl = MutableStateFlow<List<String>>(emptyList())
     val photoListUrl: StateFlow<List<String>> = _photoListUrl
 
@@ -33,6 +30,13 @@ class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel
     }
 
     fun getPhotoIndexById(photoId: String): Int {
-        return photoList.indexOfFirst { it.id == photoId }.coerceAtLeast(0)
+        val photoIndex = photoList.indexOfFirst { it.id == photoId }.coerceAtLeast(0)
+        setCurrentPhoto(photoIndex)
+        return photoIndex
+    }
+
+    fun setCurrentPhoto(photoIndex: Int) {
+        val photoId = photoList.getOrNull(photoIndex)?.id
+        SharedPhotoState.updateCurrentPhotoId(photoId)
     }
 }
