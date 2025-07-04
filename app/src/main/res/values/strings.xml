@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">PhotoViews</string>
+    <string name="photo_detail_username">Photo by %1$s</string>
 </resources>

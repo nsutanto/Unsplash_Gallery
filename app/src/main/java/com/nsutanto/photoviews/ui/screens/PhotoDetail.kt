@@ -23,9 +23,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.nsutanto.photoviews.R
 import com.nsutanto.photoviews.viewmodel.PhotoDetailViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.androidx.compose.koinViewModel
@@ -75,8 +77,8 @@ fun PhotoDetail(viewModel: PhotoDetailViewModel = koinViewModel(),
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black)
-                .padding(16.dp),
+                .background(MaterialTheme.colorScheme.background)
+                .padding(dimensionResource(id = R.dimen.padding_medium)),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
@@ -92,23 +94,24 @@ fun PhotoDetail(viewModel: PhotoDetailViewModel = koinViewModel(),
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.DarkGray)
-                    .padding(16.dp)
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(dimensionResource(id = R.dimen.padding_medium))
             ) {
-                if (!photo.userName.isNullOrBlank()) {
+                photo.userName?.let { username ->
                     Text(
-                        text = "Photo by ${photo.userName}", // TODO: Move this
+                        text = stringResource(id = R.string.photo_detail_username, username),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Color.White // TODO Use theme color
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                 }
 
-                if (!photo.description.isNullOrBlank()) {
-                    Spacer(modifier = Modifier.height(8.dp))
+
+                photo.description?.let { description ->
+                    Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.padding_small)))
                     Text(
-                        text = photo.description,
+                        text = description,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                 }
             }
