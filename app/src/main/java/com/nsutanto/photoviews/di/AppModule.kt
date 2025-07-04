@@ -8,7 +8,7 @@ import com.nsutanto.photoviews.repository.PhotoRepository
 import com.nsutanto.photoviews.viewmodel.PhotoDetailViewModel
 import com.nsutanto.photoviews.viewmodel.PhotoGalleryViewModel
 import org.koin.android.ext.koin.androidContext
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val appModule = module {
@@ -22,6 +22,6 @@ val appModule = module {
     }
     single { get<AppDatabase>().photoDao() }
     single<IPhotoRepository> { PhotoRepository(api = get(), dao = get()) }
-    viewModel { PhotoGalleryViewModel(get()) }
-    viewModel { PhotoDetailViewModel(get()) }
+    viewModelOf(::PhotoGalleryViewModel)
+    viewModelOf(::PhotoDetailViewModel)
 }
