@@ -10,7 +10,7 @@ import io.ktor.serialization.gson.*
 import com.nsutanto.photoviews.BuildConfig
 
 object ApiService {
-    private const val PER_PAGE = 100
+    private const val PER_PAGE = 10
     private const val BASE_URL = "https://api.unsplash.com"
 
     private val client = HttpClient {

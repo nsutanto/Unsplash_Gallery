@@ -71,6 +71,7 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
         viewModelScope.launch {
             photoList[index].id?.let { id ->
                 _selectedPhotoId.emit(id)
+                SharedPhotoState.updateCurrentPhotoId(id)
             }
         }
     }
