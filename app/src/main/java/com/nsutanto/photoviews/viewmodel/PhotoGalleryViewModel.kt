@@ -10,8 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
-class PhotoGalleryViewModel : ViewModel() {
-    private val repository = PhotoRepository()
+class PhotoGalleryViewModel(private val repository: PhotoRepository) : ViewModel() {
 
     enum class APIStatus { INIT, ERROR, LOADING }
     private var currentPage = 1

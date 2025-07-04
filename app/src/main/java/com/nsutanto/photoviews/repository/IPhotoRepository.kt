@@ -1,5 +1,5 @@
 package com.nsutanto.photoviews.repository
 
-interface IPhotosRepository {
+interface IPhotoRepository {
     suspend fun fetchPhotos(page: Int)
 }

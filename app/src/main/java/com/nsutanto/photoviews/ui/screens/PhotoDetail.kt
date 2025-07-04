@@ -19,9 +19,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.nsutanto.photoviews.viewmodel.PhotoDetailViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun PhotoDetail(viewModel: PhotoDetailViewModel = viewModel(),
+fun PhotoDetail(viewModel: PhotoDetailViewModel = koinViewModel(),
                 photoId: String) {
 
     val photoDetail by viewModel.photoDetailState.collectAsStateWithLifecycle()

@@ -8,8 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class PhotoDetailViewModel : ViewModel() {
-    private val repository = PhotoRepository()
+class PhotoDetailViewModel(private val repository: PhotoRepository) : ViewModel() {
 
     data class PhotoDetail(
         val url: String? = null,

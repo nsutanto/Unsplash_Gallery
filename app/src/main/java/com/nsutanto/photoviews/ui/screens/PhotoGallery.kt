@@ -25,9 +25,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun PhotoGallery(viewModel: PhotoGalleryViewModel = viewModel(),
+fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
                  onPhotoClick: (String) -> Unit) {
     val photoUrls by viewModel.photoListUrl.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
