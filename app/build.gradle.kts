@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.ktor.client.okhttp)
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.coil.compose)
+    implementation(libs.navigation.compose)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

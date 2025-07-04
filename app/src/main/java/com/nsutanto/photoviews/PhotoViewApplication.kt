@@ -8,7 +8,7 @@ class PhotoViewApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        setupStrictMode()
+        //setupStrictMode()
     }
 
     private fun setupStrictMode() {
