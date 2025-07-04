@@ -7,21 +7,22 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.dimensionResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nsutanto.photoviews.viewmodel.PhotoGalleryViewModel
 import coil.compose.AsyncImage
+import com.nsutanto.photoviews.R
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import org.koin.androidx.compose.koinViewModel
@@ -31,9 +32,9 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
                  onPhotoClick: (String) -> Unit) {
     val photoUrls by viewModel.photoListUrl.collectAsStateWithLifecycle()
     val currentPhotoIndex by viewModel.lastViewedIndex.collectAsStateWithLifecycle()
+    val gridState = rememberLazyGridState()
 
-    val listState = rememberLazyListState()
-
+    // Observe if photo is clicked so that we can navigate to the detail screen
     LaunchedEffect(Unit) {
         viewModel.selectedPhotoId.collect { photoId ->
             photoId?.let {
@@ -44,31 +45,40 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
     }
 
     LaunchedEffect(currentPhotoIndex) {
-        currentPhotoIndex?.let {
-            listState.animateScrollToItem(it)
+        currentPhotoIndex?.let { index ->
+            println("***** Scrolling to index: $index")
+            gridState.scrollToItem(index = index, scrollOffset = 0)
         }
     }
 
-    LaunchedEffect(listState) {
-        snapshotFlow { listState.layoutInfo }
+    // Trigger fetchPhotos when reaching near the end
+    LaunchedEffect(gridState) {
+        snapshotFlow { gridState.layoutInfo }
             .map { layoutInfo ->
-                val lastVisible = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                // counting last visible, needs to use first() since last() will return big number during initialization.
+                // Otherwise it will try to re-compose and re-fetch multiple times
+                val lastVisible = layoutInfo.visibleItemsInfo.firstOrNull()?.index ?: 0
                 val totalItems = layoutInfo.totalItemsCount
                 lastVisible to totalItems
             }
             .distinctUntilChanged()
-            .collect { (lastVisible, totalItems) ->
-                if (lastVisible >= totalItems - 3) {
+            .collectLatest { (lastVisible, totalItems) ->
+                val isNearBottom = lastVisible >= totalItems - 3 // start fetching when 3 items are left
+
+                if (isNearBottom) {
                     viewModel.fetchPhotos()
                 }
             }
     }
 
-    LazyColumn(
-        state = listState,
+
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(1),
+        state = gridState,
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        contentPadding = PaddingValues(dimensionResource(id = R.dimen.padding_small)),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_small)),
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_small))
     ) {
         items(photoUrls.size) { index ->
             PhotoItem(
@@ -90,8 +100,7 @@ fun PhotoItem(url: String, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .clip(RoundedCornerShape(8.dp))
-            .background(Color.LightGray)
+            .background(MaterialTheme.colorScheme.background)
             .clickable { onClick() }
     )
 }
