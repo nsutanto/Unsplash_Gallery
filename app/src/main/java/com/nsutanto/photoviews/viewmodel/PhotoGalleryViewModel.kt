@@ -7,6 +7,7 @@ import com.nsutanto.photoviews.repository.IPhotoRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 
 class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewModel() {
 
@@ -29,7 +30,6 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
         // Collect photos from repository
         viewModelScope.launch {
             repository.photoFlow.collect { photos ->
-                println("***** Photo Size is ${photos.size}")
                 photoList = photos.toMutableList()
                 _photoListUrl.value = photos.mapNotNull { it.urls?.regular }
             }
@@ -49,6 +49,7 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
         fetchPhotos()
     }
 
+    private val fetchMutex = Mutex()
     fun fetchPhotos() {
         viewModelScope.launch {
             _apiStatus.value = APIStatus.LOADING
