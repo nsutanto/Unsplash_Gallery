@@ -65,7 +65,6 @@ class PhotoRepositoryTest {
             assertEquals("1", result[0].id)
             assertEquals("2", result[1].id)
         }
-        // Assert: verify insertAll was called with the expected entities
         coVerify(exactly = 1) {
             dao.insertAll(match { entities ->
                 entities.size == 2 && entities[0].id == "1" && entities[1].id == "2"
@@ -134,22 +133,16 @@ class PhotoRepositoryTest {
 
     @Test
     fun `fetchPhotos should add only unique photos to photoFlow`() = runTest {
-        // Arrange: cached photos (already in DB)
         coEvery { dao.getAll() } returns cachedEntities
-        // New API response: 1 duplicate (id = "2") and 1 new (id = "3")
         coEvery { api.fetchPhotos(2) } returns testPhotosPage2
         coEvery { dao.insertAll(any()) } just Runs
 
-        // Act: create repo to trigger init block (loads cache)
         repository = PhotoRepository(api = api, dao = dao)
 
-        // Wait for the init block to populate _photoFlow
         advanceUntilIdle()
 
-        // Act: call fetchPhotos with page = 2
         repository.fetchPhotos(2)
 
-        // Assert: we should now have 3 unique photos
         repository.photoFlow.test {
             val result = awaitItem()
             assertEquals(3, result.size)
