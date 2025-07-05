@@ -7,6 +7,7 @@ import com.nsutanto.photoviews.db.AppDatabase
 import com.nsutanto.photoviews.db.PhotoDao
 import com.nsutanto.photoviews.db.PhotoEntity
 import junit.framework.TestCase.assertEquals
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -44,7 +45,7 @@ class PhotoDaoTest {
         )
 
         photoDao.insertAll(photoEntities)
-        val result = photoDao.getAll()
+        val result = photoDao.getAll().first()
 
         assertEquals(2, result.size)
         assertEquals("url1", result[0].url)
@@ -59,7 +60,7 @@ class PhotoDaoTest {
         photoDao.insertAll(listOf(photo1))
         photoDao.insertAll(listOf(photo1Updated))
 
-        val result = photoDao.getAll()
+        val result = photoDao.getAll().first()
 
         assertEquals(1, result.size)
         assertEquals("url1Updated", result[0].url)

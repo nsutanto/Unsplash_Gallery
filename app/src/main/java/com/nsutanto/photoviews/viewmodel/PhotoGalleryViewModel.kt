@@ -6,6 +6,7 @@ import com.nsutanto.photoviews.model.Photo
 import com.nsutanto.photoviews.repository.IPhotoRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 
@@ -29,7 +30,7 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
     init {
         // Collect photos from repository
         viewModelScope.launch {
-            repository.photoFlow.collect { photos ->
+            repository.photoFlow.collectLatest { photos ->
                 photoList = photos.toMutableList()
                 _photoListUrl.value = photos.mapNotNull { it.urls?.regular }
             }
@@ -67,6 +68,7 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
         // Get photo id by index
         viewModelScope.launch {
             val id = photoList[index].id
+            println("***** Photo clicked: $id at index $index")
             // Update the current photo id in the shared state so the photo detail screen can open the right photo
             SharedPhotoState.updateCurrentPhotoId(id)
         }
