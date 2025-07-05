@@ -17,6 +17,7 @@ class ApiService(
         private const val BASE_URL = "https://api.unsplash.com"
     }
 
+    // Ideally we should have APIResponse that contain success, error, and data
     override suspend fun fetchPhotos(page: Int, perPage: Int): List<Photo> {
         val response: HttpResponse = client.get("$BASE_URL/photos") {
             parameter("page", page)
@@ -25,8 +26,8 @@ class ApiService(
                 append("Authorization", "Client-ID $apiKey")
             }
         }
-
         if (!response.status.isSuccess()) {
+            // TODO: Should probably have an APIException that derived from Exception
             throw Exception("HTTP ${response.status.value}: ${response.status.description}")
         }
 

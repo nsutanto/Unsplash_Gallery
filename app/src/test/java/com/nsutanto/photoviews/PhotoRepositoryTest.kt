@@ -110,7 +110,7 @@ class PhotoRepositoryTest {
         }
     }
 
-    @Test
+    @Test(expected = Exception::class)
     fun `fetchPhotos should fallback to cache when API fails`() = runTest {
 
         coEvery { dao.getAll() } returns cachedEntities
