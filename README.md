@@ -10,8 +10,8 @@
 - Preserves scroll position when returning to grid view
 - Dark mode support
 - Offline caching of photos using Room database
+- Share photo link
 - Unit tests (APIService, Repository, Viewmodel, and Room)
-- 
 
 
 # Mobile Developer Coding Challenge
