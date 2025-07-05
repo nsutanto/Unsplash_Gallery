@@ -1,6 +1,5 @@
 package com.nsutanto.photoviews.repository
 
-import com.nsutanto.photoviews.api.ApiService
 import com.nsutanto.photoviews.api.IApiService
 import com.nsutanto.photoviews.db.PhotoDao
 import com.nsutanto.photoviews.db.toEntity
