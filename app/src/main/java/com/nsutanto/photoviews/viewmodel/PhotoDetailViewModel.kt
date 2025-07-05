@@ -19,6 +19,9 @@ class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel
     private val _photos = MutableStateFlow<List<PhotoDetail>>(emptyList())
     val photos: StateFlow<List<PhotoDetail>> = _photos
 
+    private val _initialIndex = MutableStateFlow(0)
+    val initialIndex: StateFlow<Int> = _initialIndex
+
     init {
         viewModelScope.launch {
             repository.photoFlow.collect { photos ->
@@ -34,15 +37,22 @@ class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel
                 _photos.value = photoDetails
             }
         }
-    }
 
-    fun getPhotoIndexById(photoId: String): Int {
-        val photoIndex = _photos.value.indexOfFirst { it.id == photoId }.coerceAtLeast(0)
-        setCurrentPhotoIdByIndex(photoIndex)
-        return photoIndex
+        viewModelScope.launch {
+            SharedPhotoState.currentPhotoId.collect { currentPhotoId ->
+
+                currentPhotoId?.let { photoId ->
+                    val photoIndex = _photos.value.indexOfFirst { it.id == photoId }
+                    if (photoIndex >= 0) {
+                        _initialIndex.value = photoIndex
+                    }
+                }
+            }
+        }
     }
 
     fun setCurrentPhotoIdByIndex(photoIndex: Int) {
+        // Update the current photo id in the shared state so that it can scroll to the correct photo
         val photoId = _photos.value.getOrNull(photoIndex)?.id
         SharedPhotoState.updateCurrentPhotoId(photoId)
     }

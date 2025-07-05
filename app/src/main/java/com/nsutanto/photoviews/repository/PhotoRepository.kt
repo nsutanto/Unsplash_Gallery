@@ -1,6 +1,6 @@
 package com.nsutanto.photoviews.repository
 
-import com.nsutanto.photoviews.api.ApiService
+import com.nsutanto.photoviews.api.IApiService
 import com.nsutanto.photoviews.db.PhotoDao
 import com.nsutanto.photoviews.db.toEntity
 import com.nsutanto.photoviews.db.toPhoto
@@ -12,9 +12,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-
 class PhotoRepository(
-    private val api: ApiService,
+    private val api: IApiService,
     private val dao: PhotoDao
 ) : IPhotoRepository {
 
@@ -51,13 +50,14 @@ class PhotoRepository(
 
             // Append only unique new photos to the current list
             _photoFlow.value += uniqueNewPhotos
-        } catch (e: Exception) {
-            println("***** Get Exception: ${e.message}")
-            // TODO: Handle all exception for now, maybe need a separate API exception or other error
+        }  catch (e: Exception) {
             val cachedPhotos = withContext(Dispatchers.IO) {
                 dao.getAll().map { it.toPhoto() }
             }
             _photoFlow.value = cachedPhotos
+            // Throw for now so that the ViewModel can handle it
+            // Ideally we should have APIResponse that contain success, error, and data
+            throw e
         }
     }
 }
