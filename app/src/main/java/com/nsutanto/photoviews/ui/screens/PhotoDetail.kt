@@ -17,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,10 +31,10 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun PhotoDetail(viewModel: PhotoDetailViewModel = koinViewModel(),
-                photoId: String) {
+fun PhotoDetail(viewModel: PhotoDetailViewModel = koinViewModel()) {
 
     val photos by viewModel.photos.collectAsStateWithLifecycle()
+    val initialIndex by viewModel.initialIndex.collectAsStateWithLifecycle()
 
     if (photos.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -44,15 +43,10 @@ fun PhotoDetail(viewModel: PhotoDetailViewModel = koinViewModel(),
         return
     }
 
-    // Find the initial page based on photoId
-    val initialPage = remember(photoId to photos) {
-        viewModel.getPhotoIndexById(photoId)
-    }
-
     // Pager state
     // https://developer.android.com/develop/ui/compose/layouts/pager
     val pagerState = rememberPagerState(
-        initialPage = initialPage,
+        initialPage = initialIndex,
         pageCount = {
             photos.size
         }

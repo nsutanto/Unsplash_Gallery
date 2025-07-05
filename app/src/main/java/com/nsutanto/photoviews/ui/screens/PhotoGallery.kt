@@ -29,24 +29,13 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
-                 onPhotoClick: (String) -> Unit) {
+                 onPhotoClick: () -> Unit) {
     val photoUrls by viewModel.photoListUrl.collectAsStateWithLifecycle()
     val currentPhotoIndex by viewModel.lastViewedIndex.collectAsStateWithLifecycle()
     val gridState = rememberLazyGridState()
 
-    // Observe if photo is clicked so that we can navigate to the detail screen
-    LaunchedEffect(Unit) {
-        viewModel.selectedPhotoId.collect { photoId ->
-            photoId?.let {
-                onPhotoClick(photoId)
-                viewModel.onNavigationHandled()
-            }
-        }
-    }
-
     LaunchedEffect(currentPhotoIndex) {
         currentPhotoIndex?.let { index ->
-            println("***** Scrolling to index: $index")
             gridState.scrollToItem(index = index, scrollOffset = 0)
         }
     }
@@ -85,6 +74,7 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
                 url = photoUrls[index],
                 onClick = {
                     viewModel.onPhotoClicked(index)
+                    onPhotoClick()
                 }
             )
         }

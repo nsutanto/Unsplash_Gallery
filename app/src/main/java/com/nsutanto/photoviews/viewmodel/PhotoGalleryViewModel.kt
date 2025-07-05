@@ -5,10 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.nsutanto.photoviews.api.ApiService
 import com.nsutanto.photoviews.model.Photo
 import com.nsutanto.photoviews.repository.IPhotoRepository
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
 class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewModel() {
@@ -17,9 +15,6 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
 
     private val _photoListUrl = MutableStateFlow<List<String>>(emptyList())
     val photoListUrl: StateFlow<List<String>> = _photoListUrl
-
-    private val _selectedPhotoId = MutableSharedFlow<String?>()
-    val selectedPhotoId = _selectedPhotoId.asSharedFlow()
 
     private val _lastViewedIndex = MutableStateFlow<Int?>(null)
     val lastViewedIndex: StateFlow<Int?> = _lastViewedIndex
@@ -74,15 +69,8 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
         // Get photo id by index
         viewModelScope.launch {
             val id = photoList[index].id
-            _selectedPhotoId.emit(id)
+            // Update the current photo id in the shared state so the photo detail screen can open the right photo
             SharedPhotoState.updateCurrentPhotoId(id)
-        }
-    }
-
-    fun onNavigationHandled() {
-        // Reset so that the next click will trigger the navigation again
-        viewModelScope.launch {
-            _selectedPhotoId.emit(null)
         }
     }
 }
