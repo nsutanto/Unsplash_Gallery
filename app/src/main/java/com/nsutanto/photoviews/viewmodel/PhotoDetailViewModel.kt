@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.nsutanto.photoviews.repository.IPhotoRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel() {
@@ -24,8 +26,10 @@ class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel
 
     init {
         viewModelScope.launch {
-            repository.photoFlow.collect { photos ->
-
+            combine(
+                repository.photoFlow,
+                SharedPhotoState.currentPhotoId
+            ) { photos, currentPhotoId ->
                 val photoDetails = photos.map { photo ->
                     PhotoDetail(
                         id = photo.id,
@@ -34,19 +38,16 @@ class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel
                         description = photo.description
                     )
                 }
+                val initialIndex = currentPhotoId?.let { id ->
+                    photoDetails.indexOfFirst { it.id == id }.takeIf { it >= 0 }
+                } ?: 0
+
+                Pair(photoDetails, initialIndex)
+
+            }.collectLatest { (photoDetails, initialIndex) ->
                 _photos.value = photoDetails
-            }
-        }
+                _initialIndex.value = initialIndex
 
-        viewModelScope.launch {
-            SharedPhotoState.currentPhotoId.collect { currentPhotoId ->
-
-                currentPhotoId?.let { photoId ->
-                    val photoIndex = _photos.value.indexOfFirst { it.id == photoId }
-                    if (photoIndex >= 0) {
-                        _initialIndex.value = photoIndex
-                    }
-                }
             }
         }
     }
