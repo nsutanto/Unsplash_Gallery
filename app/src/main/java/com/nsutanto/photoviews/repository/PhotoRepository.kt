@@ -37,7 +37,6 @@ class PhotoRepository(
 
     override suspend fun fetchPhotos(page: Int) {
         try {
-            println("***** Fetch Photos Page: $page")
             val newPhotos = api.fetchPhotos(page)
             val uniqueNewPhotos = newPhotos.filterNot { newPhoto ->
                 _photoFlow.value.any { it.id == newPhoto.id }

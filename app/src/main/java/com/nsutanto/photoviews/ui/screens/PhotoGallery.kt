@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -23,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nsutanto.photoviews.viewmodel.PhotoGalleryViewModel
 import coil.compose.AsyncImage
@@ -63,7 +63,7 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
             }
             .distinctUntilChanged()
             .collectLatest { (lastVisible, totalItems) ->
-                val isNearBottom = lastVisible >= totalItems - 3 // start fetching when 3 items are left
+                val isNearBottom = lastVisible >= totalItems - 5 // start fetching when 5 items are left
 
                 if (isNearBottom) {
                     viewModel.fetchPhotos()
@@ -106,9 +106,9 @@ fun PhotoItem(url: String, onClick: () -> Unit) {
         model = url,
         contentDescription = null,
         contentScale = ContentScale.Fit,
+        placeholder = painterResource(R.drawable.image_placeholder),
         modifier = Modifier
             .fillMaxWidth()
-            .wrapContentHeight()
             .background(MaterialTheme.colorScheme.background)
             .clickable { onClick() }
     )
