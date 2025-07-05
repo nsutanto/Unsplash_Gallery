@@ -6,8 +6,11 @@ import com.nsutanto.photoviews.model.PhotoUser
 import com.nsutanto.photoviews.repository.IPhotoRepository
 import com.nsutanto.photoviews.viewmodel.PhotoDetailViewModel
 import com.nsutanto.photoviews.viewmodel.SharedPhotoState
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -80,13 +83,16 @@ class PhotoDetailViewModelTest {
     fun `setCurrentPhotoIdByIndex should update SharedPhotoState with correct photoId`() = runTest {
         val flow = MutableStateFlow(testPhotos)
         every { repository.photoFlow } returns flow
-
+        mockkObject(SharedPhotoState)
         val viewModel = PhotoDetailViewModel(repository)
         advanceUntilIdle()
 
         viewModel.setCurrentPhotoIdByIndex(1)
         advanceUntilIdle()
 
-        assertEquals("2", SharedPhotoState.currentPhotoId.value)
+        coVerify(exactly = 1) {
+            SharedPhotoState.updateCurrentPhotoId("2")
+        }
+        unmockkObject(SharedPhotoState)
     }
 }
