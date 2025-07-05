@@ -77,6 +77,7 @@ dependencies {
     testImplementation(libs.testing.mock)
     testImplementation(libs.cash.turbine)
     testImplementation(libs.coroutines.test)
+    testImplementation(libs.ktor.client.mock)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

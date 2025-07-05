@@ -1,6 +1,7 @@
 package com.nsutanto.photoviews.repository
 
 import com.nsutanto.photoviews.api.ApiService
+import com.nsutanto.photoviews.api.IApiService
 import com.nsutanto.photoviews.db.PhotoDao
 import com.nsutanto.photoviews.db.toEntity
 import com.nsutanto.photoviews.db.toPhoto
@@ -14,7 +15,7 @@ import kotlinx.coroutines.withContext
 
 
 class PhotoRepository(
-    private val api: ApiService,
+    private val api: IApiService,
     private val dao: PhotoDao
 ) : IPhotoRepository {
 
