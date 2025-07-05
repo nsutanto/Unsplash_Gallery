@@ -1,3 +1,19 @@
+# Developer Notes
+- Network library used: Ktor
+- Dependency injection: Koin
+- Image loading library: Coil
+
+# Features
+- Infinite scrolling grid of photos from Unsplash
+- Fullscreen detail view with metadata
+- Swipe navigation between photos in detail view
+- Preserves scroll position when returning to grid view
+- Dark mode support
+- Offline caching of photos using Room database
+- Unit tests (APIService, Repository, Viewmodel, and Room)
+- 
+
+
 # Mobile Developer Coding Challenge
 
 Build a small, high-quality mobile app that displays and lets users browse a grid of curated photos from Unsplash, then view each photo fullscreen with metadata.
