@@ -1,9 +1,10 @@
 # Developer Notes
+## Android Libraries Used
 - Network library used: Ktor
 - Dependency injection: Koin
 - Image loading library: Coil
 
-# Features
+## Features
 - Infinite scrolling grid of photos from Unsplash
 - Fullscreen detail view with metadata
 - Swipe navigation between photos in detail view
