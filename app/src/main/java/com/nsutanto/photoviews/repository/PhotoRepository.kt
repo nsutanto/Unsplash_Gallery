@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.flowOn
 
 class PhotoRepository(
     private val api: IApiService,
@@ -20,7 +21,7 @@ class PhotoRepository(
         entities.map {
             it.toPhoto()
         }
-    }
+    }.flowOn(Dispatchers.IO)
 
     override suspend fun fetchPhotos(page: Int) {
         try {
