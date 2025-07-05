@@ -16,6 +16,10 @@ koinVersion = "4.1.0"
 composeFoundationVersion = "1.8.3"
 roomVersion = "2.7.2"
 devToolKspVersion = "2.2.0-2.0.2"
+mockkVersion = "1.14.4"
+turbineVersion = "1.2.1"
+coroutinesTestVersion = "1.10.2"
+junitKtx = "1.2.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -45,7 +49,11 @@ compose-foundation = { group = "androidx.compose.foundation", name="foundation",
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomVersion" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomVersion" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomVersion" }
-
+testing-mock = { group = "io.mockk", name = "mockk", version.ref = "mockkVersion" }
+cash-turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbineVersion" }
+coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTestVersion" }
+room-testing = { group = "androidx.room", name = "room-testing", version.ref = "roomVersion" }
+androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }
 
 
 [plugins]
