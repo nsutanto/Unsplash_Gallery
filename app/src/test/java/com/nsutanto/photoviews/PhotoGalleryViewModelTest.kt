@@ -137,4 +137,23 @@ class PhotoGalleryViewModelTest {
         unmockkObject(SharedPhotoState)
     }
 
+    @Test
+    fun `fetchNextPageIfNeeded should trigger repository fetch with next page number`() = runTest {
+        val photoFlow = MutableStateFlow(testPhotos)
+        val capturedPages = mutableListOf<Int>()
+
+        coEvery { repository.photoFlow } returns photoFlow
+        coEvery { repository.fetchPhotos(capture(capturedPages)) } just Runs
+
+        viewModel = PhotoGalleryViewModel(repository)
+
+        advanceUntilIdle()
+
+        viewModel.fetchNextPageIfNeeded(lastVisibleIndex = 8)
+
+        advanceUntilIdle()
+
+        assertEquals(listOf(1, 2), capturedPages) // Page 1 (init) then Page 2 (fetchNextPageIfNeeded)
+    }
+
 }
