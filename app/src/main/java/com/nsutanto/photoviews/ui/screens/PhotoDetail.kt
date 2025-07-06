@@ -36,11 +36,12 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun PhotoDetail(viewModel: PhotoDetailViewModel = koinViewModel()) {
 
-    val photos by viewModel.photos.collectAsStateWithLifecycle()
+    val currentPhoto by viewModel.currentPhoto.collectAsStateWithLifecycle()
+    val photoListSize by viewModel.photoListSize.collectAsStateWithLifecycle()
     val initialIndex by viewModel.initialIndex.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    if (photos.isEmpty()) {
+    if (currentPhoto == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
@@ -52,7 +53,7 @@ fun PhotoDetail(viewModel: PhotoDetailViewModel = koinViewModel()) {
     val pagerState = rememberPagerState(
         initialPage = initialIndex,
         pageCount = {
-            photos.size
+            photoListSize
         }
     )
 
@@ -69,7 +70,7 @@ fun PhotoDetail(viewModel: PhotoDetailViewModel = koinViewModel()) {
         state = pagerState,
         modifier = Modifier.fillMaxSize()
     ) { page ->
-        val photo = photos[page]
+        val photo = currentPhoto
 
         Column(
             modifier = Modifier
@@ -79,14 +80,16 @@ fun PhotoDetail(viewModel: PhotoDetailViewModel = koinViewModel()) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            AsyncImage(
-                model = photo.url,
-                contentDescription = null,
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            )
+            photo?.url?.let { photoUrl ->
+                AsyncImage(
+                    model = photoUrl,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                )
+            }
 
             Column(
                 modifier = Modifier
@@ -94,7 +97,7 @@ fun PhotoDetail(viewModel: PhotoDetailViewModel = koinViewModel()) {
                     .background(MaterialTheme.colorScheme.background)
                     .padding(dimensionResource(id = R.dimen.padding_medium))
             ) {
-                photo.userName?.let { username ->
+                photo?.userName?.let { username ->
                     Text(
                         text = stringResource(id = R.string.photo_detail_username, username),
                         style = MaterialTheme.typography.bodyLarge,
@@ -102,8 +105,7 @@ fun PhotoDetail(viewModel: PhotoDetailViewModel = koinViewModel()) {
                     )
                 }
 
-
-                photo.description?.let { description ->
+                photo?.description?.let { description ->
                     Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.padding_small)))
                     Text(
                         text = description,
@@ -112,7 +114,7 @@ fun PhotoDetail(viewModel: PhotoDetailViewModel = koinViewModel()) {
                     )
                 }
 
-                photo.url?.let { url ->
+                photo?.url?.let { url ->
                     Button(
                         onClick = { SharePhotoLink.shareImageUrl(context, url) },
                         modifier = Modifier

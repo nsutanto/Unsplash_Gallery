@@ -2,6 +2,7 @@ package com.nsutanto.photoviews.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nsutanto.photoviews.model.Photo
 import com.nsutanto.photoviews.repository.IPhotoRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,11 +19,16 @@ class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel
         val description: String? = null
     )
 
-    private val _photos = MutableStateFlow<List<PhotoDetail>>(emptyList())
-    val photos: StateFlow<List<PhotoDetail>> = _photos
+    private val _currentPhoto = MutableStateFlow<PhotoDetail?>(null)
+    val currentPhoto: StateFlow<PhotoDetail?> = _currentPhoto
+
+    private val _photoListSize = MutableStateFlow(0)
+    val photoListSize: StateFlow<Int> = _photoListSize
 
     private val _initialIndex = MutableStateFlow(0)
     val initialIndex: StateFlow<Int> = _initialIndex
+
+    private var _photoList = listOf<Photo>()
 
     init {
         viewModelScope.launch {
@@ -30,6 +36,7 @@ class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel
                 repository.photoFlow,
                 SharedPhotoState.currentPhotoId
             ) { photos, currentPhotoId ->
+                _photoList = photos
                 val photoDetails = photos.map { photo ->
                     PhotoDetail(
                         id = photo.id,
@@ -45,7 +52,8 @@ class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel
                 Pair(photoDetails, initialIndex)
 
             }.collectLatest { (photoDetails, initialIndex) ->
-                _photos.value = photoDetails
+                _currentPhoto.value = photoDetails.getOrNull(initialIndex)
+                _photoListSize.value = photoDetails.size
                 _initialIndex.value = initialIndex
             }
         }
@@ -53,7 +61,7 @@ class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel
 
     fun setCurrentPhotoIdByIndex(photoIndex: Int) {
         // Update the current photo id in the shared state so that it can scroll to the correct photo
-        val photoId = _photos.value.getOrNull(photoIndex)?.id
+        val photoId = _photoList.getOrNull(photoIndex)?.id
         SharedPhotoState.updateCurrentPhotoId(photoId)
     }
 }

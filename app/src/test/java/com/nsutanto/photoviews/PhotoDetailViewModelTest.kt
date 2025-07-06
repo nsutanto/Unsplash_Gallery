@@ -47,19 +47,32 @@ class PhotoDetailViewModelTest {
     }
 
     @Test
-    fun `should map photoFlow into photoDetails`() = runTest {
+    fun `currentPhoto should be updated based on currentPhotoId`() = runTest {
         val flow = MutableStateFlow(testPhotos)
         every { repository.photoFlow } returns flow
 
         val viewModel = PhotoDetailViewModel(repository)
         advanceUntilIdle()
 
+        SharedPhotoState.updateCurrentPhotoId("3")
+        advanceUntilIdle()
 
-        val details = viewModel.photos.value
-        assertEquals(3, details.size)
-        assertEquals("1", details[0].id)
-        assertEquals("user2", details[1].userName)
-        assertEquals("desc3", details[2].description)
+        val current = viewModel.currentPhoto.value
+        assertEquals("3", current?.id)
+        assertEquals("url3", current?.url)
+        assertEquals("user3", current?.userName)
+        assertEquals("desc3", current?.description)
+    }
+
+    @Test
+    fun `photoListSize should reflect repository photo count`() = runTest {
+        val flow = MutableStateFlow(testPhotos)
+        every { repository.photoFlow } returns flow
+
+        val viewModel = PhotoDetailViewModel(repository)
+        advanceUntilIdle()
+
+        assertEquals(3, viewModel.photoListSize.value)
     }
 
     @Test
