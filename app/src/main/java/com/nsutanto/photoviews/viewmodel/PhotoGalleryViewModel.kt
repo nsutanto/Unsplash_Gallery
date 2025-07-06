@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
 
 class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewModel() {
 
@@ -50,7 +49,6 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
         fetchPhotos()
     }
 
-    private val fetchMutex = Mutex()
     fun fetchPhotos() {
         viewModelScope.launch {
             _apiStatus.value = APIStatus.LOADING
@@ -68,7 +66,6 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
         // Get photo id by index
         viewModelScope.launch {
             val id = photoList[index].id
-            println("***** Photo clicked: $id at index $index")
             // Update the current photo id in the shared state so the photo detail screen can open the right photo
             SharedPhotoState.updateCurrentPhotoId(id)
         }
