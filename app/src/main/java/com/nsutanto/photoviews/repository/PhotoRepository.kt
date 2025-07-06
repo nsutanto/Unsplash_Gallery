@@ -16,7 +16,6 @@ class PhotoRepository(
     private val dao: PhotoDao
 ) : IPhotoRepository {
 
-
     override val photoFlow: Flow<List<Photo>> = dao.getAll().map { entities ->
         entities.map {
             it.toPhoto()
@@ -26,8 +25,8 @@ class PhotoRepository(
     override suspend fun fetchPhotos(page: Int) {
         try {
             val newPhotos = api.fetchPhotos(page)
+            val entities = newPhotos.map { it.toEntity() }
             withContext(Dispatchers.IO) {
-                val entities = newPhotos.map { it.toEntity() }
                 dao.insertAll(entities)
             }
         }  catch (e: Exception) {
