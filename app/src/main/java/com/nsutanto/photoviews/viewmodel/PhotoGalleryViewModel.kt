@@ -24,13 +24,13 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
     private val _lastViewedIndex = MutableStateFlow<Int?>(null)
     val lastViewedIndex: StateFlow<Int?> = _lastViewedIndex
 
-    private var photoList = listOf<Photo>()
+    private var _photoList = listOf<Photo>()
 
     init {
         // Collect photos from repository
         viewModelScope.launch {
             repository.photoFlow.collectLatest { photos ->
-                photoList = photos
+                _photoList = photos
                 _photoListUrl.value = photos.mapNotNull { it.urls?.regular }
             }
         }
@@ -39,7 +39,7 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
         viewModelScope.launch {
             SharedPhotoState.currentPhotoId.collect { photoId ->
                 photoId?.let { id ->
-                    val photoIndex = photoList.indexOfFirst { it.id == id }
+                    val photoIndex = _photoList.indexOfFirst { it.id == id }
                     _lastViewedIndex.value = photoIndex
                 }
             }
@@ -65,14 +65,14 @@ class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewMode
     fun onPhotoClicked(index: Int) {
         // Get photo id by index
         viewModelScope.launch {
-            val id = photoList[index].id
+            val id = _photoList[index].id
             // Update the current photo id in the shared state so the photo detail screen can open the right photo
             SharedPhotoState.updateCurrentPhotoId(id)
         }
     }
 
-    fun fetchNextPageIfNeeded(lastVisibleIndex: Int, totalItems: Int) {
-        val isNearBottom = lastVisibleIndex >= totalItems - LAST_ITEM_TO_FETCH
+    fun fetchNextPageIfNeeded(lastVisibleIndex: Int) {
+        val isNearBottom = lastVisibleIndex >= _photoList.size - LAST_ITEM_TO_FETCH
 
         if (isNearBottom) {
             fetchPhotos()

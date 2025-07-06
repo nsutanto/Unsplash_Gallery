@@ -139,7 +139,6 @@ class PhotoGalleryViewModelTest {
 
     @Test
     fun `fetchNextPageIfNeeded should trigger repository fetch with next page number`() = runTest {
-        // Arrange
         val photoFlow = MutableStateFlow(testPhotos)
         val capturedPages = mutableListOf<Int>()
 
@@ -148,16 +147,12 @@ class PhotoGalleryViewModelTest {
 
         viewModel = PhotoGalleryViewModel(repository)
 
-        // Wait for init fetch (should fetch page 1)
         advanceUntilIdle()
 
-        // Act - simulate user scrolling near the bottom
-        viewModel.fetchNextPageIfNeeded(lastVisibleIndex = 8, totalItems = 10)
+        viewModel.fetchNextPageIfNeeded(lastVisibleIndex = 8)
 
-        // Allow the coroutine to complete
         advanceUntilIdle()
 
-        // Assert
         assertEquals(listOf(1, 2), capturedPages) // Page 1 (init) then Page 2 (fetchNextPageIfNeeded)
     }
 

@@ -57,13 +57,11 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
             .map { layoutInfo ->
                 // counting last visible, needs to use first() since last() will return big number during initialization.
                 // Otherwise it will try to re-compose and re-fetch multiple times
-                val lastVisible = layoutInfo.visibleItemsInfo.firstOrNull()?.index ?: 0
-                val totalItems = layoutInfo.totalItemsCount
-                lastVisible to totalItems
+                layoutInfo.visibleItemsInfo.firstOrNull()?.index ?: 0
             }
             .distinctUntilChanged()
-            .collectLatest { (lastVisible, totalItems) ->
-                viewModel.fetchNextPageIfNeeded(lastVisible, totalItems)
+            .collectLatest { lastVisible ->
+                viewModel.fetchNextPageIfNeeded(lastVisible)
             }
     }
 
