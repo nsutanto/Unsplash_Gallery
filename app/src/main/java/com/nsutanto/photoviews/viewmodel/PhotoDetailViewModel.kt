@@ -47,7 +47,6 @@ class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel
             }.collectLatest { (photoDetails, initialIndex) ->
                 _photos.value = photoDetails
                 _initialIndex.value = initialIndex
-
             }
         }
     }
