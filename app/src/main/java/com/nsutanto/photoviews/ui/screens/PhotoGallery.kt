@@ -63,11 +63,7 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
             }
             .distinctUntilChanged()
             .collectLatest { (lastVisible, totalItems) ->
-                val isNearBottom = lastVisible >= totalItems - 5 // start fetching when 5 items are left
-
-                if (isNearBottom) {
-                    viewModel.fetchPhotos()
-                }
+                viewModel.fetchNextPageIfNeeded(lastVisible, totalItems)
             }
     }
 
