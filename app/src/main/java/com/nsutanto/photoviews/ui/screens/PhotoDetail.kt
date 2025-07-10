@@ -26,7 +26,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.nsutanto.photoviews.R
@@ -82,13 +81,15 @@ fun PhotoDetail(
 
 
     // Update shared state as user swipes
-    //LaunchedEffect(pagerState) {
-    //    snapshotFlow { pagerState.currentPage }
-    //        .distinctUntilChanged()
-    //        .collect { index ->
-    //            viewModel.setCurrentPhotoId(photos[index]?.id)
-    //        }
-    //}
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }
+            .distinctUntilChanged()
+            .collect { index ->
+                if (photos.itemCount > 0) {
+                    viewModel.setCurrentPhotoId(photos[index]?.id)
+                }
+            }
+    }
 
 
 }

@@ -5,6 +5,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
+import com.nsutanto.photoviews.api.ApiService.Companion.PER_PAGE
 import com.nsutanto.photoviews.db.PhotoDao
 import com.nsutanto.photoviews.db.toPhoto
 import com.nsutanto.photoviews.model.Photo
@@ -21,7 +22,7 @@ class PhotoRepository(
 
     override fun getPhotoPager(): Flow<PagingData<Photo>> {
         return Pager(
-            config = PagingConfig(pageSize = 10),
+            config = PagingConfig(pageSize = PER_PAGE),
             remoteMediator = remoteMediator,
             pagingSourceFactory = { dao.pagingSource() }
         ).flow

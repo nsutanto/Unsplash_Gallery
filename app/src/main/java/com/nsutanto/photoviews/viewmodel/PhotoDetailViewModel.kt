@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel() {
+
     private val _initialIndex = MutableStateFlow(0)
     val initialIndex: StateFlow<Int> = _initialIndex
 
@@ -22,6 +23,9 @@ class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel
         .cachedIn(viewModelScope)
 
     init {
+       
+
+
         viewModelScope.launch {
             SharedPhotoState.currentPhotoId.collectLatest { currentId ->
                 if (currentId != null) {
@@ -32,7 +36,6 @@ class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel
     }
 
     fun setCurrentPhotoId(photoId: String?) {
-        println("***** On Photo Swiped: $photoId *****")
         SharedPhotoState.updateCurrentPhotoId(photoId)
     }
 }

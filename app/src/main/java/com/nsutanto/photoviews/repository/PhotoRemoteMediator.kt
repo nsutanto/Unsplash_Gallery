@@ -11,6 +11,7 @@ import com.nsutanto.photoviews.db.PhotoDao
 import com.nsutanto.photoviews.db.PhotoEntity
 import com.nsutanto.photoviews.db.toEntity
 
+// https://developer.android.com/topic/libraries/architecture/paging/v3-network-db
 @OptIn(ExperimentalPagingApi::class)
 class PhotoRemoteMediator(
     private val api: IApiService,

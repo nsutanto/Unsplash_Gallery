@@ -8,6 +8,7 @@ import androidx.room.Query
 
 @Dao
 interface PhotoDao {
+    // https://developer.android.com/topic/libraries/architecture/paging/v3-network-db
     @Query("SELECT * FROM photos")
     fun pagingSource(): PagingSource<Int, PhotoEntity>
 

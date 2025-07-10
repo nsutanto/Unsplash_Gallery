@@ -22,6 +22,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -37,18 +38,23 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
     val photos = viewModel.photoPagingFlow.collectAsLazyPagingItems()
 
     // Collect the current photo index and API status
-    val currentPhotoIndex by viewModel.lastViewedIndex.collectAsStateWithLifecycle()
+    val currentPhotoId by viewModel.currentPhotoId.collectAsStateWithLifecycle()
 
     // Create grid state and context for scrolling and showing error
     val gridState = rememberLazyGridState()
     val context = LocalContext.current
 
     // Scroll to the current photo when index changes
-    LaunchedEffect(currentPhotoIndex) {
-        currentPhotoIndex?.let { index ->
-            gridState.scrollToItem(index = index, scrollOffset = 0)
+
+    LaunchedEffect(currentPhotoId) {
+        currentPhotoId?.let {
+            val index = photos.itemSnapshotList.items.indexOfFirst { it.id == currentPhotoId }
+            if (index >= 0) {
+                gridState.scrollToItem(index)
+            }
         }
     }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         // LazyVerticalGrid for infinite scroll
@@ -82,7 +88,7 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
                     )
                 }
                 loadState.refresh is LoadState.Error -> {
-                    Toast.makeText(context, "Error fetching photos", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, stringResource(id = R.string.error_message), Toast.LENGTH_SHORT).show()
                 }
             }
         }
