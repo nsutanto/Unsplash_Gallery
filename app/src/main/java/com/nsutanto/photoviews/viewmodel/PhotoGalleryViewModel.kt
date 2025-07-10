@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewModel() {
 
     val photoPagingFlow: Flow<PagingData<Photo>> = repository
-        .getPhotoPager()
+        .photoPager
         .cachedIn(viewModelScope)
 
     private val _currentPhotoId = MutableStateFlow<String?>(null)

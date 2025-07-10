@@ -17,7 +17,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -26,13 +25,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.nsutanto.photoviews.R
-import com.nsutanto.photoviews.model.Photo
 import com.nsutanto.photoviews.util.SharePhotoLink
 import com.nsutanto.photoviews.viewmodel.PhotoDetailViewModel
-import com.nsutanto.photoviews.viewmodel.SharedPhotoState
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.androidx.compose.koinViewModel
 
@@ -41,25 +39,24 @@ fun PhotoDetail(
     viewModel: PhotoDetailViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
-    val photoId by SharedPhotoState.currentPhotoId.collectAsState()
-    val initialIndex by viewModel.initialIndex.collectAsState()
-
-    val photos = viewModel.photoPagingFlow.collectAsLazyPagingItems()
+    val photoId by viewModel.currentPhotoId.collectAsStateWithLifecycle()
+    val photoDetailState by viewModel.photoDetailState.collectAsStateWithLifecycle()
+    val photos = photoDetailState.currentPhotoFlow.collectAsLazyPagingItems()
 
     val pagerState = rememberPagerState(
-        initialPage = initialIndex,
+        initialPage = photos.itemSnapshotList.indexOfFirst { it?.id == photoId }.coerceAtLeast(0),
         pageCount = {
             photos.itemCount
         }
     )
 
+
     // Scroll to the photo with matching ID once photos are loaded
     LaunchedEffect(photos.itemSnapshotList.items, photoId) {
-        val index = photos.itemSnapshotList.items.indexOfFirst { it.id == photoId }
-        if (index >= 0) {
-            pagerState.scrollToPage(index)
-            viewModel.setCurrentPhotoId(photoId)
-        }
+        val index = photos.itemSnapshotList.indexOfFirst { it?.id == photoId }.coerceAtLeast(0)
+        pagerState.scrollToPage(index)
+        //viewModel.setCurrentPhotoId(photoId)
+
     }
 
     HorizontalPager(
@@ -68,10 +65,12 @@ fun PhotoDetail(
     ) { index ->
         val photo = photos[index]
         if (photo != null) {
-            PhotoDetailContent(
-                photo = photo,
-                onShare = { SharePhotoLink.shareImageUrl(context, photo.urls?.regular ?: "") }
-            )
+            photo.url?.let { url ->
+                PhotoDetailContent(
+                    photo = photo,
+                    onShare = { SharePhotoLink.shareImageUrl(context, url) }
+                )
+            }
         } else {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
@@ -90,12 +89,10 @@ fun PhotoDetail(
                 }
             }
     }
-
-
 }
 
 @Composable
-fun PhotoDetailContent(photo: Photo, onShare: () -> Unit) {
+fun PhotoDetailContent(photo: PhotoDetailViewModel.PhotoDetail, onShare: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -104,7 +101,7 @@ fun PhotoDetailContent(photo: Photo, onShare: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        photo.urls?.regular?.let { url ->
+        photo.url?.let { url ->
             AsyncImage(
                 model = url,
                 contentDescription = null,
@@ -120,7 +117,7 @@ fun PhotoDetailContent(photo: Photo, onShare: () -> Unit) {
                 .fillMaxWidth()
                 .padding(dimensionResource(id = R.dimen.padding_medium))
         ) {
-            photo.user?.username?.let { username ->
+            photo.userName?.let { username ->
                 Text(
                     text = stringResource(id = R.string.photo_detail_username, username),
                     style = MaterialTheme.typography.bodyLarge,

@@ -5,5 +5,5 @@ import com.nsutanto.photoviews.model.Photo
 import kotlinx.coroutines.flow.Flow
 
 interface IPhotoRepository {
-    fun getPhotoPager(): Flow<PagingData<Photo>>
+    val photoPager: Flow<PagingData<Photo>>
 }
