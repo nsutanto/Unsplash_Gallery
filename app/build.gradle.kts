@@ -68,6 +68,10 @@ dependencies {
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     implementation(libs.androidx.junit.ktx)
+    implementation(libs.androidx.paging.runtime)
+    implementation(libs.androidx.paging.compose)
+    implementation(libs.room.paging)
+
     ksp(libs.room.compiler)
     annotationProcessor(libs.room.compiler)
 

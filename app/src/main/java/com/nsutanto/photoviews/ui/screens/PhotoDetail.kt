@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -26,104 +27,122 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.nsutanto.photoviews.R
+import com.nsutanto.photoviews.model.Photo
 import com.nsutanto.photoviews.util.SharePhotoLink
 import com.nsutanto.photoviews.viewmodel.PhotoDetailViewModel
+import com.nsutanto.photoviews.viewmodel.SharedPhotoState
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun PhotoDetail(viewModel: PhotoDetailViewModel = koinViewModel()) {
-
-    val currentPhoto by viewModel.currentPhoto.collectAsStateWithLifecycle()
-    val photoListSize by viewModel.photoListSize.collectAsStateWithLifecycle()
-    val initialIndex by viewModel.initialIndex.collectAsStateWithLifecycle()
+fun PhotoDetail(
+    viewModel: PhotoDetailViewModel = koinViewModel()
+) {
     val context = LocalContext.current
+    val photoId by SharedPhotoState.currentPhotoId.collectAsState()
+    val initialIndex by viewModel.initialIndex.collectAsState()
 
-    if (currentPhoto == null) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
+    val photos = viewModel.photoPagingFlow.collectAsLazyPagingItems()
 
-    // Pager state
-    // https://developer.android.com/develop/ui/compose/layouts/pager
     val pagerState = rememberPagerState(
         initialPage = initialIndex,
         pageCount = {
-            photoListSize
+            photos.itemCount
         }
     )
 
-    // Observe page changes to update the current photo in the view model
-    LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.currentPage }
-            .distinctUntilChanged()
-            .collect { pageIndex ->
-                viewModel.setCurrentPhotoIdByIndex(pageIndex)
-            }
+    // Scroll to the photo with matching ID once photos are loaded
+    LaunchedEffect(photos.itemSnapshotList.items, photoId) {
+        val index = photos.itemSnapshotList.items.indexOfFirst { it.id == photoId }
+        if (index >= 0) {
+            pagerState.scrollToPage(index)
+            viewModel.setCurrentPhotoId(photoId)
+        }
     }
 
     HorizontalPager(
         state = pagerState,
         modifier = Modifier.fillMaxSize()
-    ) { page ->
-        val photo = currentPhoto
+    ) { index ->
+        val photo = photos[index]
+        if (photo != null) {
+            PhotoDetailContent(
+                photo = photo,
+                onShare = { SharePhotoLink.shareImageUrl(context, photo.urls?.regular ?: "") }
+            )
+        } else {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        }
+    }
+
+
+    // Update shared state as user swipes
+    //LaunchedEffect(pagerState) {
+    //    snapshotFlow { pagerState.currentPage }
+    //        .distinctUntilChanged()
+    //        .collect { index ->
+    //            viewModel.setCurrentPhotoId(photos[index]?.id)
+    //        }
+    //}
+
+
+}
+
+@Composable
+fun PhotoDetailContent(photo: Photo, onShare: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(dimensionResource(id = R.dimen.padding_medium)),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
+    ) {
+        photo.urls?.regular?.let { url ->
+            AsyncImage(
+                model = url,
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            )
+        }
 
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(dimensionResource(id = R.dimen.padding_medium)),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
+                .fillMaxWidth()
+                .padding(dimensionResource(id = R.dimen.padding_medium))
         ) {
-            photo?.url?.let { photoUrl ->
-                AsyncImage(
-                    model = photoUrl,
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
+            photo.user?.username?.let { username ->
+                Text(
+                    text = stringResource(id = R.string.photo_detail_username, username),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
 
-            Column(
+            photo.description?.let { desc ->
+                Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.padding_small)))
+                Text(
+                    text = desc,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+
+            Button(
+                onClick = onShare,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(dimensionResource(id = R.dimen.padding_medium))
+                    .padding(top = dimensionResource(id = R.dimen.padding_small))
             ) {
-                photo?.userName?.let { username ->
-                    Text(
-                        text = stringResource(id = R.string.photo_detail_username, username),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                }
-
-                photo?.description?.let { description ->
-                    Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.padding_small)))
-                    Text(
-                        text = description,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                }
-
-                photo?.url?.let { url ->
-                    Button(
-                        onClick = { SharePhotoLink.shareImageUrl(context, url) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = dimensionResource(id = R.dimen.padding_small))
-                    ) {
-                        Text(stringResource(id = R.string.share_photo_link),)
-                    }
-                }
+                Text(stringResource(id = R.string.share_photo_link))
             }
         }
     }

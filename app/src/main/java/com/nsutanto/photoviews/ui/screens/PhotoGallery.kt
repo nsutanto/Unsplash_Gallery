@@ -16,7 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -24,74 +23,71 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.nsutanto.photoviews.viewmodel.PhotoGalleryViewModel
 import coil.compose.AsyncImage
 import com.nsutanto.photoviews.R
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
                  onPhotoClick: () -> Unit) {
-    val photoUrls by viewModel.photoListUrl.collectAsStateWithLifecycle()
+    // Observe the Paging data for photos
+    val photos = viewModel.photoPagingFlow.collectAsLazyPagingItems()
+
+    // Collect the current photo index and API status
     val currentPhotoIndex by viewModel.lastViewedIndex.collectAsStateWithLifecycle()
-    val apiStatus by viewModel.apiStatus.collectAsStateWithLifecycle()
+
+    // Create grid state and context for scrolling and showing error
     val gridState = rememberLazyGridState()
     val context = LocalContext.current
 
-    if (apiStatus == PhotoGalleryViewModel.APIStatus.ERROR) {
-        Toast.makeText(context, "Error fetching getting photos", Toast.LENGTH_SHORT).show()
-    }
-
+    // Scroll to the current photo when index changes
     LaunchedEffect(currentPhotoIndex) {
         currentPhotoIndex?.let { index ->
             gridState.scrollToItem(index = index, scrollOffset = 0)
         }
     }
 
-    // Trigger fetchPhotos when reaching near the end
-    LaunchedEffect(gridState) {
-        snapshotFlow { gridState.layoutInfo }
-            .map { layoutInfo ->
-                // counting last visible, needs to use first() since last() will return big number during initialization.
-                // Otherwise it will try to re-compose and re-fetch multiple times
-                layoutInfo.visibleItemsInfo.firstOrNull()?.index ?: 0
-            }
-            .distinctUntilChanged()
-            .collectLatest { lastVisible ->
-                viewModel.fetchNextPageIfNeeded(lastVisible)
-            }
-    }
-
     Box(modifier = Modifier.fillMaxSize()) {
+        // LazyVerticalGrid for infinite scroll
         LazyVerticalGrid(
-            columns = GridCells.Fixed(1),
+            columns = GridCells.Fixed(1), // Adjust grid to 2 columns (you can tweak this for responsiveness)
             state = gridState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(dimensionResource(id = R.dimen.padding_small)),
             verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_small)),
             horizontalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_small))
         ) {
-            items(photoUrls.size) { index ->
-                PhotoItem(
-                    url = photoUrls[index],
-                    onClick = {
-                        viewModel.onPhotoClicked(index)
-                        onPhotoClick()
-                    }
-                )
+            // Use itemsIndexed to access items safely in the Paging data
+            items(photos.itemCount) { index ->
+                val photo = photos[index]
+                photo?.urls?.regular?.let { url ->
+                    PhotoItem(
+                        url = url,
+                        onClick = {
+                            viewModel.onPhotoClicked(photos[index]?.id)
+                            onPhotoClick()
+                        }
+                    )
+                }
             }
         }
-
-        // Loading indicator
-        if (apiStatus == PhotoGalleryViewModel.APIStatus.LOADING) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center)
-            )
+        photos.apply {
+            when {
+                loadState.refresh is LoadState.Loading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                loadState.refresh is LoadState.Error -> {
+                    Toast.makeText(context, "Error fetching photos", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
+
 }
 
 @Composable
