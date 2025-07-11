@@ -50,7 +50,6 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
 
     // Scroll to the current photo when index changes
     LaunchedEffect( currentPhotoId, photos.itemSnapshotList.items) {
-        //println("Size = ${photos.itemSnapshotList.size}")
         val index = photos.itemSnapshotList.indexOfFirst { it?.id == currentPhotoId }
         if (currentPhotoId != null && index >= 0) {
 

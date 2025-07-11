@@ -64,7 +64,6 @@ fun PhotoDetail(
         ) { pageIndex ->
             if (pageIndex < photos.itemCount) {
                 val photo = photos[pageIndex]
-                println("***** HorizontalPager index: $pageIndex, ID: ${photo?.id}")
                 if (photo != null) {
                     PhotoDetailContent(
                         photo = photo,
