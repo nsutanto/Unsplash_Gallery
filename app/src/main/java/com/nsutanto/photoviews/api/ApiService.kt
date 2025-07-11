@@ -13,12 +13,13 @@ class ApiService(
 ) : IApiService {
 
     companion object {
-        const val PER_PAGE = 20
+        const val PER_PAGE = 10
         private const val BASE_URL = "https://api.unsplash.com"
     }
 
     // Ideally we should have APIResponse that contain success, error, and data
     override suspend fun fetchPhotos(page: Int, perPage: Int): List<Photo> {
+        //println("***** Fetch Photos: page=$page, perPage=$perPage *****")
         val response: HttpResponse = client.get("$BASE_URL/photos") {
             parameter("page", page)
             parameter("per_page", perPage)

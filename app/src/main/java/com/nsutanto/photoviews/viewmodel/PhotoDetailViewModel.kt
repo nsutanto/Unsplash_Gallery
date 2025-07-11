@@ -44,7 +44,9 @@ class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel
     }
 
     fun setCurrentPhotoId(photoId: String?) {
-        SharedPhotoState.updateCurrentPhotoId(photoId)
+        if (_currentPhotoId.value != photoId) {
+            SharedPhotoState.updateCurrentPhotoId(photoId)
+        }
     }
 
     private fun getPhotoDetailFlow(): Flow<PagingData<PhotoDetail>> {
