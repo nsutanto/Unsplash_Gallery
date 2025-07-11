@@ -45,10 +45,9 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
     val context = LocalContext.current
 
     // Scroll to the current photo when index changes
-
-    LaunchedEffect(currentPhotoId) {
-        currentPhotoId?.let {
-            val index = photos.itemSnapshotList.items.indexOfFirst { it.id == currentPhotoId }
+    LaunchedEffect(currentPhotoId, photos.itemSnapshotList.items) {
+        currentPhotoId?.let { id ->
+            val index = photos.itemSnapshotList.items.indexOfFirst { it.id == id }
             if (index >= 0) {
                 gridState.scrollToItem(index)
             }
