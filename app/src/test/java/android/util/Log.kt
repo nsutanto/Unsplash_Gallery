@@ -12,3 +12,4 @@ class Log {
         @JvmStatic fun isLoggable(tag: String?, level: Int): Boolean = false
     }
 }
+

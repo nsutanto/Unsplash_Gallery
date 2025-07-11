@@ -1,7 +1,6 @@
 package com.nsutanto.photoviews
 
 import androidx.paging.PagingData
-import androidx.paging.testing.asSnapshot
 import com.nsutanto.photoviews.model.Photo
 import com.nsutanto.photoviews.model.PhotoUrls
 import com.nsutanto.photoviews.model.PhotoUser

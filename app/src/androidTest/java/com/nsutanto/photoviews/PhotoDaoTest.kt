@@ -1,68 +1,79 @@
+@file:OptIn(androidx.paging.ExperimentalPagingApi::class, ExperimentalCoroutinesApi::class)
 package com.nsutanto.photoviews
 
+import com.nsutanto.photoviews.db.PhotoEntity
+import com.nsutanto.photoviews.db.AppDatabase
+import com.nsutanto.photoviews.db.PhotoDao
+import androidx.paging.PagingSource
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.nsutanto.photoviews.db.AppDatabase
-import com.nsutanto.photoviews.db.PhotoDao
-import com.nsutanto.photoviews.db.PhotoEntity
-import junit.framework.TestCase.assertEquals
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.*
 import org.junit.runner.RunWith
+
 
 @RunWith(AndroidJUnit4::class)
 class PhotoDaoTest {
 
-    private lateinit var database: AppDatabase
-    private lateinit var photoDao: PhotoDao
+    private lateinit var db: AppDatabase
+    private lateinit var dao: PhotoDao
+
+    private val testPhotos = listOf(
+        PhotoEntity("1", "url1", "user1", "desc1"),
+        PhotoEntity("2", "url2", "user2", "desc2"),
+        PhotoEntity("3", "url3", "user3", "desc3")
+    )
 
     @Before
     fun setup() {
-        // Use in-memory database for testing
-        database = Room.inMemoryDatabaseBuilder(
+        db = Room.inMemoryDatabaseBuilder(
             ApplicationProvider.getApplicationContext(),
             AppDatabase::class.java
-        ).allowMainThreadQueries() // only for testing
-            .build()
+        ).allowMainThreadQueries().build()
 
-        photoDao = database.photoDao()
+        dao = db.photoDao()
     }
 
     @After
-    fun teardown() {
-        database.close()
+    fun tearDown() {
+        db.close()
     }
 
     @Test
-    fun insertAndGetPhotos_shouldReturnInsertedData() = runTest {
-        val photoEntities = listOf(
-            PhotoEntity(id = "1", url = "url1", username = "user1", description = "desc1"),
-            PhotoEntity(id = "2", url = "url2", username = "user2", description = "desc2")
+    fun insert_and_query_photos() = runTest {
+        dao.insertAll(testPhotos)
+
+        val pagingSource = dao.pagingSource()
+        val loadResult = pagingSource.load(
+            PagingSource.LoadParams.Refresh(
+                key = null,
+                loadSize = 10,
+                placeholdersEnabled = false
+            )
         )
-
-        photoDao.insertAll(photoEntities)
-        val result = photoDao.getAll().first()
-
-        assertEquals(2, result.size)
-        assertEquals("url1", result[0].url)
-        assertEquals("user2", result[1].username)
+        val data = (loadResult as PagingSource.LoadResult.Page).data
+        Assert.assertEquals(3, data.size)
+        Assert.assertEquals("1", data[0].id)
+        Assert.assertEquals("2", data[1].id)
+        Assert.assertEquals("3", data[2].id)
     }
 
     @Test
-    fun insertAll_shouldReplaceOnConflict() = runTest {
-        val photo1 = PhotoEntity(id = "1", url = "url1", username = "user1", description = "desc1")
-        val photo1Updated = PhotoEntity(id = "1", url = "url1Updated", username = "user1", description = "desc1")
+    fun clearAll_should_remove_all_photos() = runTest {
+        dao.insertAll(testPhotos)
+        dao.clearAll()
 
-        photoDao.insertAll(listOf(photo1))
-        photoDao.insertAll(listOf(photo1Updated))
-
-        val result = photoDao.getAll().first()
-
-        assertEquals(1, result.size)
-        assertEquals("url1Updated", result[0].url)
+        val pagingSource = dao.pagingSource()
+        val loadResult = pagingSource.load(
+            PagingSource.LoadParams.Refresh(
+                key = null,
+                loadSize = 10,
+                placeholdersEnabled = false
+            )
+        )
+        val data = (loadResult as PagingSource.LoadResult.Page).data
+        Assert.assertTrue(data.isEmpty())
     }
 }
