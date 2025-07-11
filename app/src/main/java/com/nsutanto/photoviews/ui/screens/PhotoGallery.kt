@@ -39,6 +39,7 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
 
     // Collect the current photo index and API status
     val currentPhotoId by viewModel.currentPhotoId.collectAsStateWithLifecycle()
+    println("***** PhotoGallery: currentPhotoId = $currentPhotoId")
 
     // Create grid state and context for scrolling and showing error
     val gridState = rememberLazyGridState()
@@ -58,14 +59,13 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
     Box(modifier = Modifier.fillMaxSize()) {
         // LazyVerticalGrid for infinite scroll
         LazyVerticalGrid(
-            columns = GridCells.Fixed(1), // Adjust grid to 2 columns (you can tweak this for responsiveness)
+            columns = GridCells.Fixed(1),
             state = gridState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(dimensionResource(id = R.dimen.padding_small)),
             verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_small)),
             horizontalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_small))
         ) {
-            // Use itemsIndexed to access items safely in the Paging data
             items(photos.itemCount) { index ->
                 val photo = photos[index]
                 photo?.urls?.regular?.let { url ->

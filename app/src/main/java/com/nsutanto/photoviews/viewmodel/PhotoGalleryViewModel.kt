@@ -6,11 +6,9 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.nsutanto.photoviews.model.Photo
 import com.nsutanto.photoviews.repository.IPhotoRepository
-import com.nsutanto.photoviews.viewmodel.PhotoDetailViewModel.PhotoDetailState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class PhotoGalleryViewModel(private val repository: IPhotoRepository) : ViewModel() {
