@@ -29,9 +29,6 @@ class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel
     private val _photoDetailState = MutableStateFlow(PhotoDetailState(getPhotoDetailFlow().cachedIn(viewModelScope)))
     val photoDetailState: StateFlow<PhotoDetailState> = _photoDetailState
 
-    private val _currentPhoto = MutableStateFlow<PhotoDetail?>(null)
-    val currentPhoto: StateFlow<PhotoDetail?> = _currentPhoto
-
     private val _currentPhotoId = MutableStateFlow<String?>(null)
     val currentPhotoId: StateFlow<String?> = _currentPhotoId
 
@@ -44,8 +41,10 @@ class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel
     }
 
     fun setCurrentPhotoId(photoId: String?) {
-        if (_currentPhotoId.value != photoId) {
-            SharedPhotoState.updateCurrentPhotoId(photoId)
+        photoId?.let {
+            if (_currentPhotoId.value != photoId) {
+                SharedPhotoState.updateCurrentPhotoId(photoId)
+            }
         }
     }
 

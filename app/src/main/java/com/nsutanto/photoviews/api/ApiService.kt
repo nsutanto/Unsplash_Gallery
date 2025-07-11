@@ -13,7 +13,7 @@ class ApiService(
 ) : IApiService {
 
     companion object {
-        const val PER_PAGE = 10
+        const val PER_PAGE = 20
         private const val BASE_URL = "https://api.unsplash.com"
     }
 

@@ -44,7 +44,12 @@ fun PhotoDetail(
     val context = LocalContext.current
     val photoId by viewModel.currentPhotoId.collectAsStateWithLifecycle()
     val photoDetailState by viewModel.photoDetailState.collectAsStateWithLifecycle()
+
     val photos = photoDetailState.currentPhotoFlow.collectAsLazyPagingItems()
+
+    // Show a loading spinner until we have photos and have scrolled
+    val isLoading = photos.loadState.refresh is LoadState.Loading
+    val index = photos.itemSnapshotList.indexOfFirst { it?.id == photoId }
 
     // State to track if initial scroll is done
     val hasScrolled = remember { mutableStateOf(false) }
@@ -57,7 +62,6 @@ fun PhotoDetail(
     // Try to scroll to the photo once the photoId is available and photos are loaded
     LaunchedEffect(photoId, photos.itemSnapshotList.items) {
         if (!hasScrolled.value && photoId != null) {
-            val index = photos.itemSnapshotList.indexOfFirst { it?.id == photoId }
             if (index >= 0) {
                 pagerState.scrollToPage(index)
                 hasScrolled.value = true
@@ -65,9 +69,7 @@ fun PhotoDetail(
         }
     }
 
-    // Show a loading spinner until we have photos and have scrolled
-    val isLoading = photos.loadState.refresh is LoadState.Loading
-    val index = photos.itemSnapshotList.indexOfFirst { it?.id == photoId }
+
 
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -98,10 +100,6 @@ fun PhotoDetail(
                         photo.url?.let { SharePhotoLink.shareImageUrl(context, it) }
                     }
                 )
-            } else {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
             }
         }
     }
@@ -112,10 +110,7 @@ fun PhotoDetail(
             .distinctUntilChanged()
             .collect { index ->
                 val photo = photos.itemSnapshotList.getOrNull(index)
-                if (photo?.id != null && photo.id != photoId) {
-                    println("***** PhotoDetail: Swiping to photo with id = ${photo.id}")
-                    viewModel.setCurrentPhotoId(photo.id)
-                }
+                viewModel.setCurrentPhotoId(photo?.id)
             }
     }
 }
