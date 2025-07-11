@@ -68,7 +68,7 @@ class PhotoDetailViewModelTest {
         assertEquals("user3", current?.userName)
         assertEquals("desc3", current?.description)
     }
-    
+
 
     @Test
     fun `setCurrentPhotoIdByIndex should update SharedPhotoState with correct photoId`() = runTest {

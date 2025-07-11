@@ -1,6 +1,7 @@
 package com.nsutanto.photoviews
 
-import app.cash.turbine.test
+import androidx.paging.PagingData
+import androidx.paging.testing.asSnapshot
 import com.nsutanto.photoviews.model.Photo
 import com.nsutanto.photoviews.model.PhotoUrls
 import com.nsutanto.photoviews.model.PhotoUser
@@ -8,21 +9,15 @@ import com.nsutanto.photoviews.repository.IPhotoRepository
 import com.nsutanto.photoviews.viewmodel.PhotoGalleryViewModel
 import com.nsutanto.photoviews.viewmodel.SharedPhotoState
 import io.mockk.MockKAnnotations
-import io.mockk.Runs
-import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -31,10 +26,9 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-
 @OptIn(ExperimentalCoroutinesApi::class)
 class PhotoGalleryViewModelTest {
-    private val testDispatcher = StandardTestDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val repository = mockk<IPhotoRepository>()
     private lateinit var viewModel: PhotoGalleryViewModel
@@ -59,101 +53,22 @@ class PhotoGalleryViewModelTest {
     }
 
     @Test
-    fun `init should load photos and update url list`() = runTest {
-        val flow = MutableStateFlow(testPhotos)
-        coEvery { repository.photoFlow } returns flow
-        coEvery { repository.fetchPhotos(any()) } just Runs
-
-        viewModel = PhotoGalleryViewModel(repository)
-        advanceUntilIdle()
-        viewModel.photoListUrl.test {
-            val result = awaitItem()
-            assertEquals(listOf("url1", "url2"), result)
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
-    fun `fetchPhotos should emit ERROR status when API fails`() = runTest {
-        val photoFlow = MutableStateFlow<List<Photo>>(emptyList())
-        coEvery { repository.photoFlow } returns photoFlow
-        coEvery { repository.fetchPhotos(any()) } throws Exception("API failed")
-
-        val viewModel = PhotoGalleryViewModel(repository)
-
-        viewModel.apiStatus.test {
-            viewModel.fetchPhotos()
-
-            val emissions = mutableListOf<PhotoGalleryViewModel.APIStatus>()
-            repeat(3) { // It emit init / loading, we just care about error
-                emissions.add(awaitItem())
-            }
-
-            assertTrue(emissions.contains(PhotoGalleryViewModel.APIStatus.ERROR))
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
-    fun `fetchPhotos should request incremented page number on each call`() = runTest {
-        val capturedPages = mutableListOf<Int>()
-        every { repository.photoFlow } returns MutableStateFlow(emptyList())
-        coEvery { repository.fetchPhotos(capture(capturedPages)) } just Runs
-
-        viewModel = PhotoGalleryViewModel(repository)
-
-        advanceUntilIdle() // for init
-        viewModel.fetchPhotos()
-        advanceUntilIdle()
-        viewModel.fetchPhotos()
-        advanceUntilIdle()
-
-        // Assert that the pages were 1 (Init), 2, 3
-        assertEquals(listOf(1, 2, 3), capturedPages)
-    }
-
-
-
-    @Test
-    fun `onPhotoClicked should update SharedPhotoState`() = runTest {
-        val flow = MutableStateFlow(testPhotos)
-        every { repository.photoFlow } returns flow
-        coEvery { repository.fetchPhotos(any()) } just Runs
-
+    fun `onPhotoClicked should update SharedPhotoState with correct photoId`() = runTest {
+        val pagingData = PagingData.from(testPhotos)
+        val flow = flowOf(pagingData)
+        every { repository.photoPager } returns flow
         mockkObject(SharedPhotoState)
-        coEvery { SharedPhotoState.updateCurrentPhotoId(any()) } just Runs
-
         viewModel = PhotoGalleryViewModel(repository)
+        advanceUntilIdle()
 
-        // Wait for photoList to be updated
-        viewModel.photoListUrl.first { it.isNotEmpty() }
-
-        viewModel.onPhotoClicked(1)
+        viewModel.onPhotoClicked("1")
         advanceUntilIdle()
 
         coVerify(exactly = 1) {
-            SharedPhotoState.updateCurrentPhotoId("2")
+            SharedPhotoState.updateCurrentPhotoId("1")
         }
         unmockkObject(SharedPhotoState)
     }
-
-    @Test
-    fun `fetchNextPageIfNeeded should trigger repository fetch with next page number`() = runTest {
-        val photoFlow = MutableStateFlow(testPhotos)
-        val capturedPages = mutableListOf<Int>()
-
-        coEvery { repository.photoFlow } returns photoFlow
-        coEvery { repository.fetchPhotos(capture(capturedPages)) } just Runs
-
-        viewModel = PhotoGalleryViewModel(repository)
-
-        advanceUntilIdle()
-
-        viewModel.fetchNextPageIfNeeded(lastVisibleIndex = 8)
-
-        advanceUntilIdle()
-
-        assertEquals(listOf(1, 2), capturedPages) // Page 1 (init) then Page 2 (fetchNextPageIfNeeded)
-    }
-
 }
+
+
