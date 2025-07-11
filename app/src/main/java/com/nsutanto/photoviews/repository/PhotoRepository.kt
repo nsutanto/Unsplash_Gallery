@@ -18,11 +18,17 @@ class PhotoRepository(
 ) : IPhotoRepository {
 
     override val photoPager = Pager(
-            config = PagingConfig(pageSize = PER_PAGE),
-            remoteMediator = remoteMediator,
+            config = PagingConfig(pageSize = PER_PAGE, prefetchDistance = PREFETCH_DISTANCE),
+                remoteMediator = remoteMediator,
             pagingSourceFactory = { dao.pagingSource() }
         ).flow
             .map { pagingData -> pagingData.map { it.toPhoto() } }
             .flowOn(Dispatchers.IO)
+
+
+    companion object {
+        const val PAGE_SIZE = 15
+        const val PREFETCH_DISTANCE = PAGE_SIZE * 10
     }
 
+}
