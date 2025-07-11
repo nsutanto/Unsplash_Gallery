@@ -27,15 +27,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.nsutanto.photoviews.viewmodel.PhotoGalleryViewModel
 import coil.compose.AsyncImage
 import com.nsutanto.photoviews.R
-import com.nsutanto.photoviews.viewmodel.PhotoDetailViewModel
+import com.nsutanto.photoviews.viewmodel.PhotoViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun PhotoGallery(viewModel: PhotoDetailViewModel = koinViewModel(),
+fun PhotoGallery(viewModel: PhotoViewModel = koinViewModel(),
                  onPhotoClick: () -> Unit) {
     // Observe the Paging data for photos
     val photoDetailState by viewModel.photoDetailState.collectAsStateWithLifecycle()

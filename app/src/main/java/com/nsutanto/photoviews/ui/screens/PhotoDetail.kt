@@ -32,13 +32,13 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.nsutanto.photoviews.R
 import com.nsutanto.photoviews.util.SharePhotoLink
-import com.nsutanto.photoviews.viewmodel.PhotoDetailViewModel
+import com.nsutanto.photoviews.viewmodel.PhotoViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun PhotoDetail(
-    viewModel: PhotoDetailViewModel = koinViewModel()
+    viewModel: PhotoViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
     val photoId by viewModel.currentPhotoId.collectAsStateWithLifecycle()
@@ -94,7 +94,7 @@ fun PhotoDetail(
 }
 
 @Composable
-fun PhotoDetailContent(photo: PhotoDetailViewModel.PhotoDetail, onShare: () -> Unit) {
+fun PhotoDetailContent(photo: PhotoViewModel.PhotoDetail, onShare: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()

@@ -8,15 +8,12 @@ import com.nsutanto.photoviews.db.AppDatabase
 import com.nsutanto.photoviews.repository.IPhotoRepository
 import com.nsutanto.photoviews.repository.PhotoRemoteMediator
 import com.nsutanto.photoviews.repository.PhotoRepository
-import com.nsutanto.photoviews.viewmodel.PhotoDetailViewModel
-import com.nsutanto.photoviews.viewmodel.PhotoGalleryViewModel
+import com.nsutanto.photoviews.viewmodel.PhotoViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.gson.gson
 import org.koin.android.ext.koin.androidContext
-import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
-import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val appModule = module {
@@ -56,6 +53,5 @@ val appModule = module {
 
     single { get<AppDatabase>().photoDao() }
     single<IPhotoRepository> { PhotoRepository(dao = get(), remoteMediator = get()) }
-    viewModelOf(::PhotoGalleryViewModel)
-    viewModelOf(::PhotoDetailViewModel)
+    viewModelOf(::PhotoViewModel)
 }

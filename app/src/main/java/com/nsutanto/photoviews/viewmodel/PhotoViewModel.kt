@@ -12,9 +12,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
-class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel() {
+class PhotoViewModel(private val repository: IPhotoRepository) : ViewModel() {
 
     data class PhotoDetail(
         val id: String? = null,
@@ -33,18 +32,11 @@ class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel
     private val _currentPhotoId = MutableStateFlow<String?>(null)
     val currentPhotoId: StateFlow<String?> = _currentPhotoId
 
-    init {
-        viewModelScope.launch {
-            SharedPhotoState.currentPhotoId.collect { photoId ->
-                _currentPhotoId.value = photoId
-            }
-        }
-    }
 
     fun setCurrentPhotoId(photoId: String?) {
         photoId?.let {
             if (_currentPhotoId.value != photoId) {
-                SharedPhotoState.updateCurrentPhotoId(photoId)
+                _currentPhotoId.value = photoId
             }
         }
     }
