@@ -21,7 +21,7 @@ turbineVersion = "1.2.1"
 coroutinesTestVersion = "1.10.2"
 junitKtx = "1.2.1"
 pagingVersion = "3.3.0"
-pagingComposeVersion = "3.3.0"
+robolectricVersion = "4.11.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -60,6 +60,9 @@ androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.
 ktor-client-mock = { group = "io.ktor", name = "ktor-client-mock", version.ref = "ktor" }
 androidx-paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "pagingVersion" }
 androidx-paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "pagingVersion" }
+paging-testing = { group = "androidx.paging", name = "paging-testing", version.ref = "pagingVersion" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectricVersion" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

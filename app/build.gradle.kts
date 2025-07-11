@@ -82,6 +82,8 @@ dependencies {
     testImplementation(libs.cash.turbine)
     testImplementation(libs.coroutines.test)
     testImplementation(libs.ktor.client.mock)
+    testImplementation(libs.paging.testing)
+    testImplementation(libs.robolectric)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -90,4 +92,5 @@ dependencies {
     androidTestImplementation(libs.coroutines.test)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    testImplementation(kotlin("test"))
 }
