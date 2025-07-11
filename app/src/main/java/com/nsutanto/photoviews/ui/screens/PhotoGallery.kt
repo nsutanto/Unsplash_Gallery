@@ -16,6 +16,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -29,6 +32,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.nsutanto.photoviews.viewmodel.PhotoGalleryViewModel
 import coil.compose.AsyncImage
 import com.nsutanto.photoviews.R
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -39,19 +43,20 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
 
     // Collect the current photo index and API status
     val currentPhotoId by viewModel.currentPhotoId.collectAsStateWithLifecycle()
-    println("***** PhotoGallery: currentPhotoId = $currentPhotoId")
 
     // Create grid state and context for scrolling and showing error
     val gridState = rememberLazyGridState()
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
 
     // Scroll to the current photo when index changes
-    LaunchedEffect(currentPhotoId, photos.itemSnapshotList.items) {
-        currentPhotoId?.let { id ->
-            val index = photos.itemSnapshotList.items.indexOfFirst { it.id == id }
-            if (index >= 0) {
-                gridState.scrollToItem(index)
-            }
+    LaunchedEffect( currentPhotoId, photos.itemSnapshotList.items) {
+        //println("Size = ${photos.itemSnapshotList.size}")
+        val index = photos.itemSnapshotList.indexOfFirst { it?.id == currentPhotoId }
+        if (currentPhotoId != null && index >= 0) {
+
+            gridState.scrollToItem(index)
         }
     }
 
@@ -59,7 +64,7 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
     Box(modifier = Modifier.fillMaxSize()) {
         // LazyVerticalGrid for infinite scroll
         LazyVerticalGrid(
-            columns = GridCells.Fixed(1),
+            columns = GridCells.Fixed(2),
             state = gridState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(dimensionResource(id = R.dimen.padding_small)),
@@ -72,7 +77,10 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
                     PhotoItem(
                         url = url,
                         onClick = {
-                            viewModel.onPhotoClicked(photos[index]?.id)
+                            println("***** PhotoGallery index = $index currentPhotoId = ${photos[index]?.id}")
+                            scope.launch {
+                                viewModel.onPhotoClicked(photos[index]?.id)
+                            }
                             onPhotoClick()
                         }
                     )

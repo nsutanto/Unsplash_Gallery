@@ -35,6 +35,8 @@ import com.nsutanto.photoviews.R
 import com.nsutanto.photoviews.util.SharePhotoLink
 import com.nsutanto.photoviews.viewmodel.PhotoDetailViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -44,75 +46,62 @@ fun PhotoDetail(
     val context = LocalContext.current
     val photoId by viewModel.currentPhotoId.collectAsStateWithLifecycle()
     val photoDetailState by viewModel.photoDetailState.collectAsStateWithLifecycle()
-
     val photos = photoDetailState.currentPhotoFlow.collectAsLazyPagingItems()
 
-    // Show a loading spinner until we have photos and have scrolled
-    val isLoading = photos.loadState.refresh is LoadState.Loading
-    val index = photos.itemSnapshotList.indexOfFirst { it?.id == photoId }
+    val isLoaded = photos.loadState.refresh is LoadState.NotLoading
 
-    // State to track if initial scroll is done
-    val hasScrolled = remember { mutableStateOf(false) }
-
-    val pagerState = rememberPagerState(
-        initialPage = 0,
-        pageCount = { photos.itemCount }
-    )
-
-    // Try to scroll to the photo once the photoId is available and photos are loaded
-    LaunchedEffect(photoId, photos.itemSnapshotList.items) {
-        if (!hasScrolled.value && photoId != null) {
-            if (index >= 0) {
-                pagerState.scrollToPage(index)
-                hasScrolled.value = true
-            }
-        }
+    // Remember the index only once it is valid
+    val targetIndex = remember(photoId, photos.itemSnapshotList.items) {
+        photos.itemSnapshotList.indexOfFirst { it?.id == photoId }.takeIf { it >= 0 }
     }
 
+    // Only create pagerState after the index is available
+    //val pagerState = targetIndex?.let {
+    //    rememberPagerState(initialPage = it, pageCount = { photos.itemCount })
+    //}
+
+    val pagerState = targetIndex?.let { rememberPagerState(initialPage = it, pageCount = { photos.itemCount }) }
 
 
-    if (isLoading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-    } else if (index == -1) {
-        // Data loaded, but correct photo not found yet
+
+    if (!isLoaded || pagerState == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
     } else {
-        // index >= 0, show pager and scroll to correct photo
-        LaunchedEffect(index) {
-            if (!hasScrolled.value) {
-                pagerState.scrollToPage(index)
-                hasScrolled.value = true
-            }
-        }
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxSize()
         ) { pageIndex ->
-            val photo = photos[pageIndex]
-            if (photo != null) {
-                PhotoDetailContent(
-                    photo = photo,
-                    onShare = {
-                        photo.url?.let { SharePhotoLink.shareImageUrl(context, it) }
+            if (pageIndex < photos.itemCount) {
+                val photo = photos[pageIndex]
+                println("***** HorizontalPager index: $pageIndex, ID: ${photo?.id}")
+                if (photo != null) {
+                    PhotoDetailContent(
+                        photo = photo,
+                        onShare = {
+                            photo.url?.let { SharePhotoLink.shareImageUrl(context, it) }
+                        }
+                    )
+                } else {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
                     }
-                )
+                }
             }
+        }
+
+        // Update current photo ID when user swipes
+        LaunchedEffect(pagerState) {
+            snapshotFlow { pagerState.currentPage }
+                .distinctUntilChanged()
+                .collect { index ->
+                    val photo = photos.itemSnapshotList.getOrNull(index)
+                    viewModel.setCurrentPhotoId(photo?.id)
+                }
         }
     }
 
-    // Update current photo ID when swiping
-    LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.currentPage }
-            .distinctUntilChanged()
-            .collect { index ->
-                val photo = photos.itemSnapshotList.getOrNull(index)
-                viewModel.setCurrentPhotoId(photo?.id)
-            }
-    }
 }
 
 @Composable
