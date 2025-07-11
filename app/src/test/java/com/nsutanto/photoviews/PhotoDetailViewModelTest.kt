@@ -18,9 +18,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import androidx.paging.testing.asSnapshot
-import io.mockk.coVerify
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Assert.assertEquals
@@ -56,10 +53,6 @@ class PhotoDetailViewModelTest {
         val viewModel = PhotoViewModel(repository)
         viewModel.clearPaging()
 
-
-        //viewModel
-        //SharedPhotoState.updateCurrentPhotoId("3")
-
         val photoDetails = viewModel.photoDetailState.value.currentPhotoFlow.asSnapshot()
 
         val current = photoDetails.find { it.id == "3" }
@@ -72,20 +65,16 @@ class PhotoDetailViewModelTest {
 
 
     @Test
-    fun `setCurrentPhotoIdByIndex should update SharedPhotoState with correct photoId`() = runTest {
+    fun `setCurrentPhotoId should update with correct photoId`() = runTest {
         val pagingData = PagingData.from(testPhotos)
         val flow = flowOf(pagingData)
         every { repository.photoPager } returns flow
-        //mockkObject(SharedPhotoState)
         val viewModel = PhotoViewModel(repository)
         advanceUntilIdle()
 
         viewModel.setCurrentPhotoId("1")
         advanceUntilIdle()
 
-        coVerify(exactly = 1) {
-            //SharedPhotoState.updateCurrentPhotoId("1")
-        }
-        //unmockkObject(SharedPhotoState)
+        assertEquals("1", viewModel.currentPhotoId.value)
     }
 }
