@@ -65,6 +65,7 @@ fun PhotoDetail(
             if (pageIndex < photos.itemCount) {
                 val photo = photos[pageIndex]
                 if (photo != null) {
+                    println("***** Index: $pageIndex, id: ${photo.id}")
                     PhotoDetailContent(
                         photo = photo,
                         onShare = {

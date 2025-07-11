@@ -49,7 +49,6 @@ class PhotoDetailViewModel(private val repository: IPhotoRepository) : ViewModel
         }
     }
 
-
     fun clearPaging() {
         _photoDetailState.update { PhotoDetailState(getPhotoDetailFlow()) }
     }

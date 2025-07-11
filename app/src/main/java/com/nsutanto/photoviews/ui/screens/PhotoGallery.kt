@@ -30,14 +30,16 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.nsutanto.photoviews.viewmodel.PhotoGalleryViewModel
 import coil.compose.AsyncImage
 import com.nsutanto.photoviews.R
+import com.nsutanto.photoviews.viewmodel.PhotoDetailViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
+fun PhotoGallery(viewModel: PhotoDetailViewModel = koinViewModel(),
                  onPhotoClick: () -> Unit) {
     // Observe the Paging data for photos
-    val photos = viewModel.photoPagingFlow.collectAsLazyPagingItems()
+    val photoDetailState by viewModel.photoDetailState.collectAsStateWithLifecycle()
+    val photos = photoDetailState.currentPhotoFlow.collectAsLazyPagingItems()
 
     // Collect the current photo index and API status
     val currentPhotoId by viewModel.currentPhotoId.collectAsStateWithLifecycle()
@@ -70,12 +72,13 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
         ) {
             items(photos.itemCount) { index ->
                 val photo = photos[index]
-                photo?.urls?.regular?.let { url ->
+                photo?.url?.let { url ->
                     PhotoItem(
                         url = url,
                         onClick = {
                             scope.launch {
-                                viewModel.onPhotoClicked(photos[index]?.id)
+                                println("***** Photo Clicked: $index, id: ${photos[index]?.id}")
+                                viewModel.setCurrentPhotoId(photos[index]?.id)
                             }
                             onPhotoClick()
                         }

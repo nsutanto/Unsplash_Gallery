@@ -27,21 +27,20 @@ class PhotoRemoteMediator(
     ): MediatorResult {
         return try {
             val page = when (loadType) {
-                LoadType.REFRESH -> {
-                    currentPage = 1
+                LoadType.REFRESH -> { 1 }
+                LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
+                LoadType.APPEND -> {
                     currentPage
                 }
-                LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
-                LoadType.APPEND -> currentPage
             }
 
             val photos = api.fetchPhotos(page)
             currentPage++
 
             db.withTransaction {
-                if (loadType == LoadType.REFRESH) {
-                    dao.clearAll()
-                }
+                //if (loadType == LoadType.REFRESH) {
+                //    dao.clearAll()
+                //}
                 dao.insertAll(photos.map { it.toEntity() })
             }
 
