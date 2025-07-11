@@ -16,8 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,7 +62,7 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
     Box(modifier = Modifier.fillMaxSize()) {
         // LazyVerticalGrid for infinite scroll
         LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+            columns = GridCells.Fixed(1),
             state = gridState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(dimensionResource(id = R.dimen.padding_small)),
@@ -77,7 +75,6 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
                     PhotoItem(
                         url = url,
                         onClick = {
-                            println("***** PhotoGallery index = $index currentPhotoId = ${photos[index]?.id}")
                             scope.launch {
                                 viewModel.onPhotoClicked(photos[index]?.id)
                             }

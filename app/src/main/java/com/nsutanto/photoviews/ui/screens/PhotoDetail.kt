@@ -18,7 +18,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -35,8 +34,6 @@ import com.nsutanto.photoviews.R
 import com.nsutanto.photoviews.util.SharePhotoLink
 import com.nsutanto.photoviews.viewmodel.PhotoDetailViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -50,19 +47,11 @@ fun PhotoDetail(
 
     val isLoaded = photos.loadState.refresh is LoadState.NotLoading
 
-    // Remember the index only once it is valid
     val targetIndex = remember(photoId, photos.itemSnapshotList.items) {
         photos.itemSnapshotList.indexOfFirst { it?.id == photoId }.takeIf { it >= 0 }
     }
 
-    // Only create pagerState after the index is available
-    //val pagerState = targetIndex?.let {
-    //    rememberPagerState(initialPage = it, pageCount = { photos.itemCount })
-    //}
-
     val pagerState = targetIndex?.let { rememberPagerState(initialPage = it, pageCount = { photos.itemCount }) }
-
-
 
     if (!isLoaded || pagerState == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
