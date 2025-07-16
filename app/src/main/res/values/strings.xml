@@ -2,4 +2,5 @@
     <string name="app_name">PhotoViews</string>
     <string name="photo_detail_username">Photo by %1$s</string>
     <string name="share_photo_link">Share photo link</string>
+    <string name="error_message">Error fetching photos</string>
 </resources>

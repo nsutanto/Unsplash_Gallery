@@ -1,6 +1,7 @@
 # Developer Notes
 ## Android Libraries Used
-- Network library used: Ktor
+- Android Paging Library
+- Network library: Ktor
 - Dependency injection: Koin
 - Image loading library: Coil
 

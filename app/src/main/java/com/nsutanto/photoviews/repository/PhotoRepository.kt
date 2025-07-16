@@ -1,38 +1,34 @@
 package com.nsutanto.photoviews.repository
 
-import com.nsutanto.photoviews.api.IApiService
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.map
+import com.nsutanto.photoviews.api.ApiService.Companion.PER_PAGE
 import com.nsutanto.photoviews.db.PhotoDao
-import com.nsutanto.photoviews.db.toEntity
 import com.nsutanto.photoviews.db.toPhoto
-import com.nsutanto.photoviews.model.Photo
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.flowOn
 
+@OptIn(ExperimentalPagingApi::class)
 class PhotoRepository(
-    private val api: IApiService,
-    private val dao: PhotoDao
+    private val dao: PhotoDao,
+    private val remoteMediator: PhotoRemoteMediator
 ) : IPhotoRepository {
 
-    override val photoFlow: Flow<List<Photo>> = dao.getAll().map { entities ->
-        entities.map {
-            it.toPhoto()
-        }
-    }.flowOn(Dispatchers.IO)
+    override val photoPager = Pager(
+            config = PagingConfig(pageSize = PER_PAGE, prefetchDistance = PREFETCH_DISTANCE),
+                remoteMediator = remoteMediator,
+            pagingSourceFactory = { dao.pagingSource() }
+        ).flow
+            .map { pagingData -> pagingData.map { it.toPhoto() } }
+            .flowOn(Dispatchers.IO)
 
-    override suspend fun fetchPhotos(page: Int) {
-        try {
-            val newPhotos = api.fetchPhotos(page)
-            val entities = newPhotos.map { it.toEntity() }
-            withContext(Dispatchers.IO) {
-                dao.insertAll(entities)
-            }
-        }  catch (e: Exception) {
-            // Throw for now so that the ViewModel can handle it
-            // Ideally we should have APIResponse that contain success, error, and data
-            throw e
-        }
+
+    companion object {
+        const val PAGE_SIZE = 30
+        const val PREFETCH_DISTANCE = PAGE_SIZE * 5
     }
+
 }

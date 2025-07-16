@@ -16,56 +16,51 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.nsutanto.photoviews.viewmodel.PhotoGalleryViewModel
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.nsutanto.photoviews.R
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
+import com.nsutanto.photoviews.viewmodel.PhotoViewModel
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
+fun PhotoGallery(viewModel: PhotoViewModel = koinViewModel(),
                  onPhotoClick: () -> Unit) {
-    val photoUrls by viewModel.photoListUrl.collectAsStateWithLifecycle()
-    val currentPhotoIndex by viewModel.lastViewedIndex.collectAsStateWithLifecycle()
-    val apiStatus by viewModel.apiStatus.collectAsStateWithLifecycle()
+    // Observe the Paging data for photos
+    val photoDetailState by viewModel.photoDetailState.collectAsStateWithLifecycle()
+    val photos = photoDetailState.currentPhotoFlow.collectAsLazyPagingItems()
+
+    // Collect the current photo index and API status
+    val currentPhotoId by viewModel.currentPhotoId.collectAsStateWithLifecycle()
+
+    // Create grid state and context for scrolling and showing error
     val gridState = rememberLazyGridState()
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
-    if (apiStatus == PhotoGalleryViewModel.APIStatus.ERROR) {
-        Toast.makeText(context, "Error fetching getting photos", Toast.LENGTH_SHORT).show()
-    }
 
-    LaunchedEffect(currentPhotoIndex) {
-        currentPhotoIndex?.let { index ->
-            gridState.scrollToItem(index = index, scrollOffset = 0)
+    // Scroll to the current photo when index changes
+    LaunchedEffect( currentPhotoId, photos.itemSnapshotList.items) {
+        val index = photos.itemSnapshotList.indexOfFirst { it?.id == currentPhotoId }
+        if (currentPhotoId != null && index >= 0) {
+
+            gridState.scrollToItem(index)
         }
     }
 
-    // Trigger fetchPhotos when reaching near the end
-    LaunchedEffect(gridState) {
-        snapshotFlow { gridState.layoutInfo }
-            .map { layoutInfo ->
-                // counting last visible, needs to use first() since last() will return big number during initialization.
-                // Otherwise it will try to re-compose and re-fetch multiple times
-                layoutInfo.visibleItemsInfo.firstOrNull()?.index ?: 0
-            }
-            .distinctUntilChanged()
-            .collectLatest { lastVisible ->
-                viewModel.fetchNextPageIfNeeded(lastVisible)
-            }
-    }
 
     Box(modifier = Modifier.fillMaxSize()) {
+        // LazyVerticalGrid for infinite scroll
         LazyVerticalGrid(
             columns = GridCells.Fixed(1),
             state = gridState,
@@ -74,24 +69,36 @@ fun PhotoGallery(viewModel: PhotoGalleryViewModel = koinViewModel(),
             verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_small)),
             horizontalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_small))
         ) {
-            items(photoUrls.size) { index ->
-                PhotoItem(
-                    url = photoUrls[index],
-                    onClick = {
-                        viewModel.onPhotoClicked(index)
-                        onPhotoClick()
-                    }
-                )
+            items(photos.itemCount) { index ->
+                val photo = photos[index]
+                photo?.url?.let { url ->
+                    PhotoItem(
+                        url = url,
+                        onClick = {
+                            scope.launch {
+                                println("***** Photo Clicked: $index, id: ${photos[index]?.id}")
+                                viewModel.setCurrentPhotoId(photos[index]?.id)
+                            }
+                            onPhotoClick()
+                        }
+                    )
+                }
             }
         }
-
-        // Loading indicator
-        if (apiStatus == PhotoGalleryViewModel.APIStatus.LOADING) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center)
-            )
+        photos.apply {
+            when {
+                loadState.refresh is LoadState.Loading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                loadState.refresh is LoadState.Error -> {
+                    Toast.makeText(context, stringResource(id = R.string.error_message), Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
+
 }
 
 @Composable

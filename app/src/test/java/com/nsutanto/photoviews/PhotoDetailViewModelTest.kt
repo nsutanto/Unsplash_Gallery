@@ -1,21 +1,15 @@
 package com.nsutanto.photoviews
 
+import androidx.paging.PagingData
 import com.nsutanto.photoviews.model.Photo
 import com.nsutanto.photoviews.model.PhotoUrls
 import com.nsutanto.photoviews.model.PhotoUser
 import com.nsutanto.photoviews.repository.IPhotoRepository
-import com.nsutanto.photoviews.viewmodel.PhotoDetailViewModel
-import com.nsutanto.photoviews.viewmodel.SharedPhotoState
-import io.mockk.coVerify
+import com.nsutanto.photoviews.viewmodel.PhotoViewModel
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
-import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -23,11 +17,15 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import androidx.paging.testing.asSnapshot
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import org.junit.Assert.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PhotoDetailViewModelTest {
 
-    private val testDispatcher = StandardTestDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
     private val repository = mockk<IPhotoRepository>(relaxed = true)
 
     private val testPhotos = listOf(
@@ -48,64 +46,35 @@ class PhotoDetailViewModelTest {
 
     @Test
     fun `currentPhoto should be updated based on currentPhotoId`() = runTest {
-        val flow = MutableStateFlow(testPhotos)
-        every { repository.photoFlow } returns flow
+        val pagingData = PagingData.from(testPhotos)
+        val flow = flowOf(pagingData)
+        every { repository.photoPager } returns flow
 
-        val viewModel = PhotoDetailViewModel(repository)
-        advanceUntilIdle()
+        val viewModel = PhotoViewModel(repository)
+        viewModel.clearPaging()
 
-        SharedPhotoState.updateCurrentPhotoId("3")
-        advanceUntilIdle()
+        val photoDetails = viewModel.photoDetailState.value.currentPhotoFlow.asSnapshot()
 
-        val current = viewModel.currentPhoto.value
+        val current = photoDetails.find { it.id == "3" }
+
         assertEquals("3", current?.id)
         assertEquals("url3", current?.url)
         assertEquals("user3", current?.userName)
         assertEquals("desc3", current?.description)
     }
 
-    @Test
-    fun `photoListSize should reflect repository photo count`() = runTest {
-        val flow = MutableStateFlow(testPhotos)
-        every { repository.photoFlow } returns flow
-
-        val viewModel = PhotoDetailViewModel(repository)
-        advanceUntilIdle()
-
-        assertEquals(3, viewModel.photoListSize.value)
-    }
 
     @Test
-    fun `should update initialIndex when currentPhotoId matches`() = runTest {
-
-        val flow = MutableStateFlow(testPhotos)
-        every { repository.photoFlow } returns flow
-
-        val viewModel = PhotoDetailViewModel(repository)
+    fun `setCurrentPhotoId should update with correct photoId`() = runTest {
+        val pagingData = PagingData.from(testPhotos)
+        val flow = flowOf(pagingData)
+        every { repository.photoPager } returns flow
+        val viewModel = PhotoViewModel(repository)
         advanceUntilIdle()
 
-
-        SharedPhotoState.updateCurrentPhotoId("2")
+        viewModel.setCurrentPhotoId("1")
         advanceUntilIdle()
 
-        // Index is 1 for photoId 2
-        assertEquals(1, viewModel.initialIndex.value)
-    }
-
-    @Test
-    fun `setCurrentPhotoIdByIndex should update SharedPhotoState with correct photoId`() = runTest {
-        val flow = MutableStateFlow(testPhotos)
-        every { repository.photoFlow } returns flow
-        mockkObject(SharedPhotoState)
-        val viewModel = PhotoDetailViewModel(repository)
-        advanceUntilIdle()
-
-        viewModel.setCurrentPhotoIdByIndex(1)
-        advanceUntilIdle()
-
-        coVerify(exactly = 1) {
-            SharedPhotoState.updateCurrentPhotoId("2")
-        }
-        unmockkObject(SharedPhotoState)
+        assertEquals("1", viewModel.currentPhotoId.value)
     }
 }

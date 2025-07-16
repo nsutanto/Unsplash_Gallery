@@ -68,6 +68,10 @@ dependencies {
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     implementation(libs.androidx.junit.ktx)
+    implementation(libs.androidx.paging.runtime)
+    implementation(libs.androidx.paging.compose)
+    implementation(libs.room.paging)
+
     ksp(libs.room.compiler)
     annotationProcessor(libs.room.compiler)
 
@@ -78,12 +82,15 @@ dependencies {
     testImplementation(libs.cash.turbine)
     testImplementation(libs.coroutines.test)
     testImplementation(libs.ktor.client.mock)
+    testImplementation(libs.paging.testing)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation(libs.room.testing)
     androidTestImplementation(libs.coroutines.test)
+    androidTestImplementation(libs.paging.testing)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    testImplementation(kotlin("test"))
 }
