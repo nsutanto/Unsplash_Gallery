@@ -16,7 +16,7 @@
 - Unit tests (APIService, Repository, Viewmodel, and Room)
 
 
-## Functional Requirements
+## UI Overview
 
 1. **Grid View**  
    - Paginated, infinite-scrolling grid of photos  
@@ -29,11 +29,4 @@
    - Swipe left/right to navigate between photos  
    - On dismiss, grid scroll position retains the last-viewed photo   
 
-    
-## Features
-
-- Unit tests
-- Dark mode support
-- Offline caching of the entire photo feed using a local DB
-- Share a photo link via the system share sheet  
 
