@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 
 class MainViewModel(private val repository: IMainRepository) : ViewModel() {
 
-    private val _helloWorld = MutableStateFlow("Hello World")
+    private val _helloWorld = MutableStateFlow("")
     val helloWorld : StateFlow<String> = _helloWorld
 
     init {
