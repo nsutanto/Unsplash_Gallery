@@ -11,6 +11,15 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun AppNavigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
+
+    NavHost(navController, startDestination = Screen.MainScreen.route, modifier = modifier) {
+        composable(Screen.MainScreen.route) {
+            MainScreen()
+        }
+    }
+
+
+    /*
     val viewModel: PhotoViewModel = koinViewModel()
     NavHost(navController, startDestination = Screen.PhotoGallery.route, modifier = modifier) {
         composable(Screen.PhotoGallery.route) {
@@ -24,4 +33,6 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             PhotoDetail(viewModel = viewModel)
         }
     }
+
+     */
 }

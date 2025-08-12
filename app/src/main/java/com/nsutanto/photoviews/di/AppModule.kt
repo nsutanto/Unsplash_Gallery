@@ -5,10 +5,13 @@ import com.nsutanto.photoviews.BuildConfig
 import com.nsutanto.photoviews.api.ApiService
 import com.nsutanto.photoviews.api.IApiService
 import com.nsutanto.photoviews.db.AppDatabase
+import com.nsutanto.photoviews.repository.IMainRepository
 import com.nsutanto.photoviews.repository.IPhotoRepository
+import com.nsutanto.photoviews.repository.MainRepository
 import com.nsutanto.photoviews.repository.PhotoRemoteMediator
 import com.nsutanto.photoviews.repository.PhotoRepository
 import com.nsutanto.photoviews.viewmodel.PhotoViewModel
+import com.nsutanto.photoviews.viewmodel.MainViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.gson.gson
@@ -53,5 +56,7 @@ val appModule = module {
 
     single { get<AppDatabase>().photoDao() }
     single<IPhotoRepository> { PhotoRepository(dao = get(), remoteMediator = get()) }
+    single<IMainRepository> { MainRepository(api  = get()) }
     viewModelOf(::PhotoViewModel)
+    viewModelOf(::MainViewModel)
 }

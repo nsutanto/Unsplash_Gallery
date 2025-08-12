@@ -19,7 +19,6 @@ class ApiService(
 
     // Ideally we should have APIResponse that contain success, error, and data
     override suspend fun fetchPhotos(page: Int, perPage: Int): List<Photo> {
-        println("***** Fetching photos for page $page")
         val response: HttpResponse = client.get("$BASE_URL/photos") {
             parameter("page", page)
             parameter("per_page", perPage)
