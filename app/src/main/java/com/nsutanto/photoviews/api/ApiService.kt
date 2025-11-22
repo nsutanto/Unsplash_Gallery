@@ -1,6 +1,7 @@
 package com.nsutanto.photoviews.api
 
-import com.nsutanto.photoviews.model.Photo
+import com.nsutanto.photoviews.model.ApiResponse
+import com.nsutanto.photoviews.model.Data
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -17,15 +18,13 @@ class ApiService(
         private const val BASE_URL = "https://api.unsplash.com"
     }
 
-    // Ideally we should have APIResponse that contain success, error, and data
-    override suspend fun fetchPhotos(page: Int, perPage: Int): List<Photo> {
-        println("***** Fetching photos for page $page")
+    override suspend fun fetchAPI(): ApiResponse {
         val response: HttpResponse = client.get("$BASE_URL/photos") {
-            parameter("page", page)
-            parameter("per_page", perPage)
-            headers {
-                append("Authorization", "Client-ID $apiKey")
-            }
+            //parameter("page", page)
+            //parameter("per_page", perPage)
+            //headers {
+            //    append("Authorization", "Client-ID $apiKey")
+            //}
         }
         if (!response.status.isSuccess()) {
             // TODO: Should probably have an APIException that derived from Exception

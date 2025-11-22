@@ -6,6 +6,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 
+
+/*
 @Dao
 interface PhotoDao {
     // https://developer.android.com/topic/libraries/architecture/paging/v3-network-db
@@ -18,3 +20,5 @@ interface PhotoDao {
     @Query("DELETE FROM photos")
     suspend fun clearAll()
 }
+
+ */

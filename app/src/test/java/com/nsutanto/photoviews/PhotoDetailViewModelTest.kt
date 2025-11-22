@@ -1,11 +1,6 @@
 package com.nsutanto.photoviews
 
 import androidx.paging.PagingData
-import com.nsutanto.photoviews.model.Photo
-import com.nsutanto.photoviews.model.PhotoUrls
-import com.nsutanto.photoviews.model.PhotoUser
-import com.nsutanto.photoviews.repository.IPhotoRepository
-import com.nsutanto.photoviews.viewmodel.PhotoViewModel
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers

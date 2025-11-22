@@ -2,10 +2,8 @@ package com.nsutanto.photoviews.db
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.nsutanto.photoviews.model.Photo
-import com.nsutanto.photoviews.model.PhotoUrls
-import com.nsutanto.photoviews.model.PhotoUser
 
+/*
 @Entity(tableName = "photos")
 data class PhotoEntity(
     @PrimaryKey val id: String,
@@ -27,3 +25,5 @@ fun PhotoEntity.toPhoto(): Photo = Photo(
     user = PhotoUser(username = username),
     description = description
 )
+
+ */

@@ -2,9 +2,6 @@ package com.nsutanto.photoviews
 
 import com.google.gson.Gson
 import com.nsutanto.photoviews.api.ApiService
-import com.nsutanto.photoviews.model.Photo
-import com.nsutanto.photoviews.model.PhotoUrls
-import com.nsutanto.photoviews.model.PhotoUser
 import io.ktor.client.*
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond

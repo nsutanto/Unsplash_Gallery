@@ -1,8 +1,8 @@
 package com.nsutanto.photoviews.api
 
-import com.nsutanto.photoviews.api.ApiService.Companion.PER_PAGE
-import com.nsutanto.photoviews.model.Photo
+import com.nsutanto.photoviews.model.ApiResponse
 
 interface IApiService {
-    suspend fun fetchPhotos(page: Int, perPage: Int = PER_PAGE): List<Photo>
+
+    suspend fun fetchAPI(): ApiResponse
 }
