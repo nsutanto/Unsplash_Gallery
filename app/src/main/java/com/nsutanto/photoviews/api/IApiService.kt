@@ -1,8 +1,8 @@
 package com.nsutanto.photoviews.api
 
-import com.nsutanto.photoviews.model.ApiResponse
+import com.nsutanto.photoviews.model.MainResponse
 
 interface IApiService {
 
-    suspend fun fetchAPI(): ApiResponse
+    suspend fun fetchApi(): MainResponse
 }

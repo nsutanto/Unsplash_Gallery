@@ -1,7 +1,6 @@
 package com.nsutanto.photoviews.api
 
-import com.nsutanto.photoviews.model.ApiResponse
-import com.nsutanto.photoviews.model.Data
+import com.nsutanto.photoviews.model.MainResponse
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -10,27 +9,18 @@ import io.ktor.http.isSuccess
 
 class ApiService(
     private val client: HttpClient,
-    private val apiKey: String
 ) : IApiService {
 
     companion object {
-        const val PER_PAGE = 20
-        private const val BASE_URL = "https://api.unsplash.com"
+        private const val BASE_URL = "https://dummyjson.com/products"
     }
 
-    override suspend fun fetchAPI(): ApiResponse {
-        val response: HttpResponse = client.get("$BASE_URL/photos") {
-            //parameter("page", page)
-            //parameter("per_page", perPage)
-            //headers {
-            //    append("Authorization", "Client-ID $apiKey")
-            //}
-        }
+    override suspend fun fetchApi(): MainResponse {
+        val response: HttpResponse = client.get(BASE_URL)
+
         if (!response.status.isSuccess()) {
-            // TODO: Should probably have an APIException that derived from Exception
             throw Exception("HTTP ${response.status.value}: ${response.status.description}")
         }
-
         return response.body()
     }
 }

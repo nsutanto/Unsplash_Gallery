@@ -1,10 +1,9 @@
 package com.nsutanto.photoviews.di
 
-import com.nsutanto.photoviews.BuildConfig
 import com.nsutanto.photoviews.api.ApiService
 import com.nsutanto.photoviews.api.IApiService
-import com.nsutanto.photoviews.repository.APIRepository
-import com.nsutanto.photoviews.repository.IApiRepository
+import com.nsutanto.photoviews.repository.MainRepository
+import com.nsutanto.photoviews.repository.IMainRepository
 import com.nsutanto.photoviews.viewmodel.MainViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -23,11 +22,10 @@ val appModule = module {
 
     single<IApiService> {
         ApiService(
-            client = get(),
-            apiKey = BuildConfig.UNSPLASH_ACCESS_KEY
+            client = get()
         )
     }
 
-    single<IApiRepository> { APIRepository(apiService = get()) }
+    single<IMainRepository> { MainRepository(apiService = get()) }
     viewModelOf(::MainViewModel)
 }
